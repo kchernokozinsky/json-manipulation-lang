@@ -5,7 +5,7 @@ use logos::Logos;
 pub mod errors;
 mod literal;
 
-#[derive(Debug, Logos, PartialEq)]
+#[derive(Debug, Logos, PartialEq, Clone)]
 #[logos(error = LexingError)]
 #[logos(skip r"[ \t\n\f]+")]
 #[logos(skip r"#[^\n]*\n")]

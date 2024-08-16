@@ -1,10 +1,77 @@
 use std::str::FromStr;
+use lexer::token::{Token, errors::LexingError};
+grammar<'source>(input: &'source str);
 
-grammar;
-
-pub Term: i32 = {
-    <n:Num> => n,
-    "(" <t:Term> ")" => t,
+pub StringLiteral: (isize, &'source str, isize) = {
+   <l_location:@L> <s: STRING_LITERAL> <r_location:@L> => (s)
 };
 
-Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
+extern {
+    type Location = usize;
+    type Error = LexingError;
+
+    enum Token<'source> {
+        // Keywords
+        LET           => Token::Let,
+        NULL          => Token::Null,
+        FILTER        => Token::Filter,
+        MAP           => Token::Map,
+        MAPOBJ        => Token::MapObject,
+        FILTEROBJ     => Token::FilterObject,
+        FN            => Token::Fn,
+        IF            => Token::If,
+        ELSE          => Token::Else,
+        READ          => Token::Read,
+        WRITE         => Token::Write,
+        LOG           => Token::Log,
+
+        // Types
+        STRING        => Token::StringType,
+        FLOAT         => Token::FloatType,
+        BOOL          => Token::BoolType,
+        INT           => Token::IntType,
+        ARRAY         => Token::ArrayType,
+        OBJECT        => Token::ObjectType,
+        NULLTYPE      => Token::NullType,
+
+        // Literals and Identifiers
+        STRING_LITERAL => Token::StringLiteral(<&'source str>),
+        IDENTIFIER     => Token::Identifier(<&'source str>),
+        INT_LITERAL    => Token::IntLiteral(<i64>),
+        FLOAT_LITERAL => Token::FloatLiteral(<f64>),
+
+        // Boolean Literals
+        TRUE          => Token::BoolLiteral(true),
+        FALSE         => Token::BoolLiteral(false),
+
+        // Operators
+        "+"             => Token::Plus,
+        "-"             => Token::Minus,
+        "*"             => Token::Star,
+        "/"             => Token::Slash,
+        "=="            => Token::Equal,
+        "!="            => Token::NotEqual,
+        "<"             => Token::LessThan,
+        ">"             => Token::GreaterThan,
+        "<="            => Token::LessEqual,
+        ">="            => Token::GreaterEqual,
+        "&&"            => Token::And,
+        "||"            => Token::Or,
+        "!"             => Token::Not,
+        "="             => Token::Assign,
+
+        // Symbols
+        "."             => Token::Dot,
+        ","             => Token::Comma,
+        ":"             => Token::Colon,
+        ";"             => Token::Semicolon,
+        "("             => Token::LParen,
+        ")"             => Token::RParen,
+        "["             => Token::LBracket,
+        "]"             => Token::RBracket,
+        "{"             => Token::LBrace,
+        "}"             => Token::RBrace,
+        "=>"         => Token::Arrow,
+
+    }
+}
