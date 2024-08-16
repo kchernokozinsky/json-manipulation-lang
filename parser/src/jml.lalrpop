@@ -1,9 +1,28 @@
 use std::str::FromStr;
 use lexer::token::{Token, errors::LexingError};
-grammar<'source>(input: &'source str);
+use crate::ast::{ExpressionKind, Expression};
+grammar<'source>(source: &'source str);
 
-pub StringLiteral: (isize, &'source str, isize) = {
-   <l_location:@L> <s: STRING_LITERAL> <r_location:@L> => (s)
+
+pub Literal: Expression<'source> = {
+    Bool,
+    String,
+};
+
+String: Expression<'source> = {
+   <l:@L> <s: STRING_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::String(s)
+    }
+};
+
+Bool: Expression<'source> = {
+    <l:@L> <b: BOOL_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Bool(b)
+    }
 };
 
 extern {
@@ -26,13 +45,13 @@ extern {
         LOG           => Token::Log,
 
         // Types
-        STRING        => Token::StringType,
-        FLOAT         => Token::FloatType,
-        BOOL          => Token::BoolType,
-        INT           => Token::IntType,
-        ARRAY         => Token::ArrayType,
-        OBJECT        => Token::ObjectType,
-        NULLTYPE      => Token::NullType,
+        STRING_TYPE   => Token::StringType,
+        FLOAT_TYPE    => Token::FloatType,
+        BOOL_TYPE     => Token::BoolType,
+        INT_TYPE      => Token::IntType,
+        ARRAY_TYPE    => Token::ArrayType,
+        OBJECT_TYPE   => Token::ObjectType,
+        NULLTYPE_TYPE => Token::NullType,
 
         // Literals and Identifiers
         STRING_LITERAL => Token::StringLiteral(<&'source str>),
@@ -41,9 +60,7 @@ extern {
         FLOAT_LITERAL => Token::FloatLiteral(<f64>),
 
         // Boolean Literals
-        TRUE          => Token::BoolLiteral(true),
-        FALSE         => Token::BoolLiteral(false),
-
+        BOOL_LITERAL    => Token::BoolLiteral(<bool>),
         // Operators
         "+"             => Token::Plus,
         "-"             => Token::Minus,
