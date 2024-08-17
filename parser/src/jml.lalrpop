@@ -1,12 +1,61 @@
 use std::str::FromStr;
 use lexer::token::{Token, errors::LexingError};
-use crate::ast::{ExpressionKind, Expression};
+use crate::ast::{ExpressionKind, Expression, Statement, StatementKind, Identifier, Jml};
+
 grammar<'source>(source: &'source str);
 
 
-pub Literal: Expression<'source> = {
+pub Jml: Jml<'source> = {
+    <header: Statement*> HEADER <body:Expression> => Jml{
+        header: header, 
+        body
+    }  
+};
+
+pub Statement: Statement<'source> = {
+    <l:@L> <identifier:Identifier> "=" <expression:Expression> <r:@L> => Statement
+        {
+            l,
+            r,
+            node: StatementKind::Bind{identifier, expression},
+        },
+};
+
+pub Expression: Expression<'source> = {
+    ExpressionPrecedence1,
+    };
+
+ExpressionPrecedence1: Expression<'source> = {
+    Object,
+    List,
+    Literal,
+    Variable,
+    "(" <Expression> ")",
+
+};
+
+Literal: Expression<'source> = {
     Bool,
     String,
+    Null,
+    Float,
+    Int,
+};
+
+Identifier: Identifier<'source> = {
+   <l:@L> <s: IDENTIFIER> <r:@L> => Identifier {
+        l,
+        r,
+        node: s
+    }
+};
+
+Variable: Expression<'source> = {
+   <l:@L> <s: IDENTIFIER> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Variable(s)
+    }
 };
 
 String: Expression<'source> = {
@@ -14,6 +63,14 @@ String: Expression<'source> = {
         l,
         r,
         node: ExpressionKind::String(s)
+    }
+};
+
+Null: Expression<'source> = {
+   <l:@L> NULL <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Null
     }
 };
 
@@ -25,12 +82,57 @@ Bool: Expression<'source> = {
     }
 };
 
+Float: Expression<'source> = {
+    <l:@L> <f: FLOAT_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Float(f)
+    }
+};
+
+Object: Expression<'source> = {
+    <l:@L> "{" <pairs:Comma<(<STRING_LITERAL> ":" <Expression>)>> "}" <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Object(pairs.into_iter()
+                                            .collect()),
+    }
+};
+
+List: Expression<'source> = {
+    <l:@L> "[" <elems:Comma<Expression>> "]" <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::List(elems),
+    }
+};
+
+Int: Expression<'source> = {
+    <l:@L> <i: INT_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Int(i)
+    }
+};
+
+#[inline]
+Comma<T>: Vec<T> = { 
+    <mut v:(<T> ",")*> <e:T?> => match e { 
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
+
 extern {
     type Location = usize;
     type Error = LexingError;
 
     enum Token<'source> {
         // Keywords
+        HEADER        => Token::Header,
         LET           => Token::Let,
         NULL          => Token::Null,
         FILTER        => Token::Filter,
@@ -58,9 +160,8 @@ extern {
         IDENTIFIER     => Token::Identifier(<&'source str>),
         INT_LITERAL    => Token::IntLiteral(<i64>),
         FLOAT_LITERAL => Token::FloatLiteral(<f64>),
-
-        // Boolean Literals
         BOOL_LITERAL    => Token::BoolLiteral(<bool>),
+
         // Operators
         "+"             => Token::Plus,
         "-"             => Token::Minus,

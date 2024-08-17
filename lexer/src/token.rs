@@ -11,6 +11,9 @@ mod literal;
 #[logos(skip r"#[^\n]*\n")]
 pub enum Token<'source> {
     // Keywords
+    #[token("---")]
+    Header,
+
     #[token("let")]
     Let,
 

@@ -1,0 +1,11 @@
+let a = 1
+let d = "some_string"
+
+---
+
+{
+    "key1": a, 
+    "key2": d,
+    "key3": 1 + 2.3 
+}
+
