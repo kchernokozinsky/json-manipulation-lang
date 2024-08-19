@@ -5,13 +5,13 @@ fn main() {
     let source = r#"
 a = 1
 d = "some_string"
-c = \x y. x + y
+// c = \x y. x + y
 ---
 
 {
-    "key1": a, 
+    "key1": - - - - -a, 
     "key2": d,
-    "key3": c (1, 2) 
+    "key3": d."as" + d
 }"#;
     let lexer = Lexer::new(source);
 

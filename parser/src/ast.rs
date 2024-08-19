@@ -36,4 +36,49 @@ pub enum ExpressionKind<'source> {
     Object(HashMap<&'source str, Expression<'source>>),
     List(Vec<Expression<'source>>),
     Variable(&'source str),
+    IndexAccess {
+        target: Box<Expression<'source>>,
+        index: Box<Expression<'source>>
+    },
+    Selector {
+        target: Box<Expression<'source>>,
+        key: Box<Expression<'source>>
+    },
+
+    UnaryOp {
+        op: UnaryOp,
+        expr: Box<Expression<'source>>,
+    },
+
+    BinaryOp {
+        op: BinaryOp,
+        lhs: Box<Expression<'source>>,
+        rhs: Box<Expression<'source>>,
+    },
+}
+
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum BinaryOp {
+    EQ,
+    NE,
+    GT,
+    LT,
+    GE,
+    LE,
+    Sum,
+    Sub,
+    Mul,
+    Div,
+    Pow,
+    Mod,
+    And,
+    Or,
+    Concat,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum UnaryOp {
+    Minus,
+    Not,
 }

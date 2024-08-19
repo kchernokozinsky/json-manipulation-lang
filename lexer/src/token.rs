@@ -90,6 +90,12 @@ pub enum Token<'source> {
     BoolLiteral(bool),
 
     // Operators
+    #[token("^")]
+    Pow,
+
+    #[token("++")]
+    Concat,
+
     #[token("+")]
     Plus,
 
