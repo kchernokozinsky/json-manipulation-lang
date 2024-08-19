@@ -1,4 +1,5 @@
-use lalrpop_util::lalrpop_mod;
+use lalrpop_util::{lalrpop_mod, ParseError};
+use lexer::{token::{errors::LexingError, Token}, Lexer};
 
 pub mod ast;
 lalrpop_mod!(
@@ -6,6 +7,15 @@ lalrpop_mod!(
     #[rustfmt::skip]
     pub jml);
 
+
+
+pub fn parse(
+        source: &str,
+    ) -> Result<ast::Jml<'_>, ParseError<usize, Token<'_>, LexingError>> {
+        let lexer = Lexer::new(source);
+        jml::JmlParser::new().parse(source, lexer)
+    }
+    
 
 #[cfg(test)]
 mod tests {
