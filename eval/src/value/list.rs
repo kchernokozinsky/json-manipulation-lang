@@ -1,25 +1,14 @@
 use std::fmt;
 
-use crate::typings::Type;
+use super::JmlValue;
 
-use super::Value;
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 
-pub struct List {
-    value: Vec<Box<dyn Value>>
-}
+pub struct JmlList(Vec<JmlValue>);
 
-impl fmt::Display for List {
+impl fmt::Display for JmlList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let values: Vec<String> = self.value
-            .iter()
-            .map(|v| format!("{}", v))
-            .collect();
+        let values: Vec<String> = self.0.iter().map(|v| format!("{}", v)).collect();
         write!(f, "[{}]", values.join(", "))
-    }
-}
-
-impl Value for List {
-    fn get_type(&self) -> Type {
-         Type::List
     }
 }

@@ -1,5 +1,8 @@
 use lalrpop_util::{lalrpop_mod, ParseError};
-use lexer::{token::{errors::LexingError, Token}, Lexer};
+use lexer::{
+    token::{errors::LexingError, Token},
+    Lexer,
+};
 
 pub mod ast;
 lalrpop_mod!(
@@ -7,15 +10,10 @@ lalrpop_mod!(
     #[rustfmt::skip]
     pub jml);
 
-
-
-pub fn parse(
-        source: &str,
-    ) -> Result<ast::Jml<'_>, ParseError<usize, Token<'_>, LexingError>> {
-        let lexer = Lexer::new(source);
-        jml::JmlParser::new().parse(source, lexer)
-    }
-    
+pub fn parse(source: &str) -> Result<ast::Jml<'_>, ParseError<usize, Token<'_>, LexingError>> {
+    let lexer = Lexer::new(source);
+    jml::JmlParser::new().parse(source, lexer)
+}
 
 #[cfg(test)]
 mod tests {
@@ -36,9 +34,9 @@ mod tests {
         assert_eq!(jml.header.len(), 2);
         match &jml.header[0].node {
             StatementKind::Bind {
-                    identifier,
-                    expression,
-                } => {
+                identifier,
+                expression,
+            } => {
                 assert_eq!(identifier.node, "x");
                 if let ExpressionKind::Int(value) = expression.node {
                     assert_eq!(value, 42);
@@ -50,9 +48,9 @@ mod tests {
 
         match &jml.header[1].node {
             StatementKind::Bind {
-                    identifier,
-                    expression,
-                } => {
+                identifier,
+                expression,
+            } => {
                 assert_eq!(identifier.node, "y");
                 if let ExpressionKind::String(value) = expression.node {
                     assert_eq!(value, "hello");
@@ -76,9 +74,9 @@ mod tests {
         let statement = jml::StatementParser::new().parse(source, lexer).unwrap();
         match statement.node {
             StatementKind::Bind {
-                    identifier,
-                    expression,
-                } => {
+                identifier,
+                expression,
+            } => {
                 assert_eq!(identifier.node, "x");
                 if let ExpressionKind::Int(value) = expression.node {
                     assert_eq!(value, 42);

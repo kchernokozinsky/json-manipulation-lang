@@ -38,11 +38,11 @@ pub enum ExpressionKind<'source> {
     Variable(&'source str),
     IndexAccess {
         target: Box<Expression<'source>>,
-        index: Box<Expression<'source>>
+        index: Box<Expression<'source>>,
     },
     Selector {
         target: Box<Expression<'source>>,
-        key: Box<Expression<'source>>
+        key: Box<Expression<'source>>,
     },
 
     UnaryOp {
@@ -57,8 +57,7 @@ pub enum ExpressionKind<'source> {
     },
 }
 
-
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum BinaryOp {
     EQ,
     NE,

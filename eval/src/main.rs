@@ -1,3 +1,4 @@
+use eval::eval;
 
 fn main() {
     let source = r#"
@@ -5,12 +6,8 @@ fn main() {
     d = "some_string"
     // c = \x y. x + y
     ---
-    
-    {
-        "key1": -a, 
-        "key2": d,
-        "key3": d."as" + d
-    }"#;
+    5 + 3 < 2  "#;
     let ast = parser::parse(source).unwrap();
-    println!("{:?}", ast);
+    let value = eval(&ast);
+    println!("{}", value.unwrap());
 }

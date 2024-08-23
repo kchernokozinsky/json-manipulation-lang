@@ -1,21 +1,24 @@
-use std::fmt;
+use std::{fmt, str::FromStr};
 
-use crate::typings::Type;
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
+pub struct JmlBool(bool);
 
-use super::Value;
+impl FromStr for JmlBool {
+    type Err = <bool as FromStr>::Err;
 
-pub struct Bool {
-    value: bool
-}
-
-impl fmt::Display for Bool {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.value)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        FromStr::from_str(s).map(JmlBool)
     }
 }
 
-impl Value for Bool {
-    fn get_type(&self) -> Type {
-        Type::Bool
+impl From<bool> for JmlBool {
+    fn from(v: bool) -> Self {
+        JmlBool(v)
+    }
+}
+
+impl fmt::Display for JmlBool {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
