@@ -1,13 +1,12 @@
-use eval::eval;
+use eval::{context, eval};
 
 fn main() {
     let source = r#"
     a = 1
-    d = "some_string"
-    // c = \x y. x + y
     ---
-    5 + 3 < 2  "#;
+    a + 3  "#;
     let ast = parser::parse(source).unwrap();
-    let value = eval(&ast);
+    let mut ctx = context::Context::new();
+    let value = eval(ast, &mut ctx);
     println!("{}", value.unwrap());
 }

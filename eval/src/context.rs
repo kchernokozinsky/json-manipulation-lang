@@ -2,9 +2,9 @@ use std::{cell::RefCell, collections::HashMap};
 
 use parser::ast::Expression;
 
-use crate::value::JmlValue;
+use crate::{error::EvalError, expr::eval_expr, value::JmlValue};
 
-struct Context<'a> {
+pub struct Context<'a> {
     bindings: HashMap<String, RefCell<Binding<'a>>>,
 }
 
@@ -19,28 +19,42 @@ impl<'a> Binding<'a> {
         Binding::Expression(expr)
     }
 
-    fn eval(&mut self) -> &JmlValue {
+    fn new_with_value(value: JmlValue) -> Self {
+        Binding::Value(value)
+    }
+
+    fn eval(&mut self, ctx: &Context) -> Result<JmlValue, EvalError> {
         match self {
-            Binding::Expression(expr) => todo!(), // expression evaluation should be done here
-            Binding::Value(val) => val,
+            Binding::Expression(expr) => {
+                let value = eval_expr(expr.clone(), ctx)?;
+                *self = Binding::new_with_value(value.clone());
+                Ok(value)
+            } // expression evaluation should be done here
+            Binding::Value(val) => Ok(val.clone()),
         }
     }
 }
 
 impl<'a> Context<'a> {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Context {
             bindings: HashMap::new(),
         }
     }
 
-    fn bind(&mut self, name: String, expr: Expression<'a>) {
+    pub fn bind(&mut self, name: String, expr: Expression<'a>) {
         self.bindings.insert(name, RefCell::new(Binding::new(expr)));
     }
 
-    fn get(&self, name: impl AsRef<str>) -> Option<JmlValue> {
-        self.bindings
+    pub fn get(&self, name: impl AsRef<str>) -> Result<JmlValue, EvalError> {
+        let mut binding = self
+            .bindings
             .get(name.as_ref())
-            .map(|binding| binding.borrow_mut().eval().clone())
+            .ok_or(EvalError::UndefinedVariable {
+                name: name.as_ref().to_owned(),
+            })?
+            .borrow_mut();
+
+        binding.eval(self)
     }
 }

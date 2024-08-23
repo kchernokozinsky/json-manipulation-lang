@@ -1,19 +1,21 @@
 use parser::ast::{BinaryOp, Expression};
 
 use crate::{
+    context::Context,
     error::{EvalError, TypeError},
     value::JmlValue,
 };
 
 use super::eval_expr;
 
-pub fn eval_binary_op<'a>(
+pub fn eval_binary_op(
     op: BinaryOp,
-    lhs: &Expression,
-    rhs: &Expression,
+    lhs: Expression,
+    rhs: Expression,
+    ctx: &Context<'_>,
 ) -> Result<JmlValue, EvalError> {
-    let lhs = eval_expr(lhs)?;
-    let rhs = eval_expr(rhs)?;
+    let lhs = eval_expr(lhs, ctx)?;
+    let rhs = eval_expr(rhs, ctx)?;
 
     match op {
         BinaryOp::EQ => Ok(JmlValue::bool(lhs == rhs)),

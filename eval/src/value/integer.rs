@@ -1,6 +1,6 @@
 use std::{fmt, ops, str::FromStr};
 
-use super::{float::JmlFloat, JmlValue};
+use super::float::JmlFloat;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
 

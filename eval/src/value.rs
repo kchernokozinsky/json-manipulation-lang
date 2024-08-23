@@ -1,6 +1,5 @@
 use std::{
-    default,
-    fmt::{self, Display},
+    fmt::{self},
     ops,
 };
 
