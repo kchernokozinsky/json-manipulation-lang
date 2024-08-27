@@ -1,7 +1,11 @@
 use binary_op::eval_binary_op;
-use parser::ast::{Expression, Located};
+use parser::ast::Expression;
 
-use crate::{context::Context, error::EvalError, value::JmlValue};
+use crate::{
+    context::Context,
+    error::{EvalError, RuntimeError},
+    value::JmlValue,
+};
 
 pub mod binary_op;
 pub mod list_constructor;
@@ -17,7 +21,17 @@ pub fn eval_expr<'a>(expression: Expression, ctx: &Context<'a>) -> Result<JmlVal
         parser::ast::ExpressionKind::String(v) => Ok(JmlValue::string(v)),
         parser::ast::ExpressionKind::Object(_) => todo!(),
         parser::ast::ExpressionKind::List(v) => todo!(),
-        parser::ast::ExpressionKind::Variable(ident) => ctx.get(ident),
+        parser::ast::ExpressionKind::Variable(ident) => match ctx.lookup_variable(ident) {
+            Ok(bind) => match bind {
+                crate::context::Binding::Expression(expr) => eval_expr(expr, ctx),
+                crate::context::Binding::Value(value) => Ok(value),
+            },
+            Err(e) => Err(RuntimeError {
+                span: (l, r - l).into(),
+                kind: e,
+            }
+            .into()),
+        },
         parser::ast::ExpressionKind::IndexAccess { target, index } => todo!(),
         parser::ast::ExpressionKind::Selector { target, key } => todo!(),
         parser::ast::ExpressionKind::UnaryOp { op, expr } => todo!(),

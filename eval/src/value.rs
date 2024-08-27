@@ -9,10 +9,7 @@ use integer::JmlInt;
 use list::JmlList;
 use string::JmlString;
 
-use crate::{
-    error::{TypeError, TypeErrorKind},
-    jml_type::JmlType,
-};
+use crate::{error::TypeErrorKind, jml_type::JmlType};
 
 pub mod bool;
 pub mod float;

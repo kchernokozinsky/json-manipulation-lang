@@ -24,35 +24,35 @@ pub fn eval_binary_op(
         BinaryOp::GT => eval_ord_op(op, lhs, rhs).map_err(|e| {
             TypeError {
                 span: span.into(),
-                err: e,
+                kind: e,
             }
             .into()
         }),
         BinaryOp::LT => eval_ord_op(op, lhs, rhs).map_err(|e| {
             TypeError {
                 span: span.into(),
-                err: e,
+                kind: e,
             }
             .into()
         }),
         BinaryOp::GE => eval_ord_op(op, lhs, rhs).map_err(|e| {
             TypeError {
                 span: span.into(),
-                err: e,
+                kind: e,
             }
             .into()
         }),
         BinaryOp::LE => eval_ord_op(op, lhs, rhs).map_err(|e| {
             TypeError {
                 span: span.into(),
-                err: e,
+                kind: e,
             }
             .into()
         }),
         BinaryOp::Sum => (lhs + rhs).map_err(|e| {
             TypeError {
                 span: span.into(),
-                err: e,
+                kind: e,
             }
             .into()
         }),
