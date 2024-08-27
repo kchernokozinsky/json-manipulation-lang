@@ -1,5 +1,4 @@
 use context::Context;
-use error::EvalError;
 use expr::eval_expr;
 use parser::ast::Jml;
 use stmt::eval_stmt;
@@ -12,9 +11,9 @@ pub mod jml_type;
 pub mod stmt;
 pub mod value;
 
-pub fn eval<'a>(jml: Jml<'a>, ctx: &mut Context<'a>) -> Result<JmlValue, EvalError> {
+pub fn eval<'a>(jml: Jml<'a>, ctx: &mut Context<'a>) -> miette::Result<JmlValue> {
     for stmt in jml.header.into_iter() {
         eval_stmt(stmt, ctx)?;
     }
-    eval_expr(jml.body, ctx)
+    eval_expr(jml.body, ctx).map_err(|e| e.into())
 }

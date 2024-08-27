@@ -9,7 +9,10 @@ use integer::JmlInt;
 use list::JmlList;
 use string::JmlString;
 
-use crate::{error::TypeError, jml_type::JmlType};
+use crate::{
+    error::{TypeError, TypeErrorKind},
+    jml_type::JmlType,
+};
 
 pub mod bool;
 pub mod float;
@@ -116,9 +119,9 @@ impl JmlValue {
 }
 
 impl ops::Add<JmlValue> for JmlValue {
-    type Output = Result<JmlValue, TypeError>;
+    type Output = Result<JmlValue, TypeErrorKind>;
 
-    fn add(self, rhs: JmlValue) -> Result<JmlValue, TypeError> {
+    fn add(self, rhs: JmlValue) -> Result<JmlValue, TypeErrorKind> {
         let lhs_type = self.type_of();
         let rhs_type = rhs.type_of();
         match (self, rhs) {
@@ -126,19 +129,14 @@ impl ops::Add<JmlValue> for JmlValue {
             (JmlValue::Float(a), JmlValue::Int(b)) => Ok((a + b).into()),
             (JmlValue::Int(a), JmlValue::Int(b)) => Ok((a + b).into()),
             (JmlValue::Int(a), JmlValue::Float(b)) => Ok((a + b).into()),
-            _ => {
-                if lhs_type.is_number() {
-                    Err(TypeError::MismatchedTypes {
-                        expected: vec![JmlType::Float, JmlType::Int],
-                        found: rhs_type,
-                    })
+            _ => Err(TypeErrorKind::MismatchedTypes {
+                expected: vec![JmlType::Float, JmlType::Int],
+                found: if lhs_type.is_number() {
+                    rhs_type
                 } else {
-                    Err(TypeError::MismatchedTypes {
-                        expected: vec![JmlType::Float, JmlType::Int],
-                        found: lhs_type,
-                    })
-                }
-            }
+                    lhs_type
+                },
+            }),
         }
     }
 }

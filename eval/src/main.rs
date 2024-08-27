@@ -1,12 +1,16 @@
-use eval::{context, eval};
+use eval::{context, error, eval, value::JmlValue};
+use miette::{Context, GraphicalReportHandler, IntoDiagnostic, Result};
 
-fn main() {
+fn main() -> Result<()> {
     let source = r#"
-    a = 1
+    a = true
     ---
-    a + 3  "#;
+    (b + 5.3)
+    "#;
     let ast = parser::parse(source).unwrap();
     let mut ctx = context::Context::new();
-    let value = eval(ast, &mut ctx);
-    println!("{}", value.unwrap());
+
+    eval(ast, &mut ctx).map_err(|e| e.with_source_code(source))?;
+
+    Ok(())
 }

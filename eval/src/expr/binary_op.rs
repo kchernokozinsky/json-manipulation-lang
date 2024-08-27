@@ -2,7 +2,7 @@ use parser::ast::{BinaryOp, Expression};
 
 use crate::{
     context::Context,
-    error::{EvalError, TypeError},
+    error::{EvalError, TypeError, TypeErrorKind},
     value::JmlValue,
 };
 
@@ -14,17 +14,48 @@ pub fn eval_binary_op(
     rhs: Expression,
     ctx: &Context<'_>,
 ) -> Result<JmlValue, EvalError> {
+    let span = (lhs.l, rhs.r - lhs.l);
     let lhs = eval_expr(lhs, ctx)?;
     let rhs = eval_expr(rhs, ctx)?;
 
     match op {
         BinaryOp::EQ => Ok(JmlValue::bool(lhs == rhs)),
         BinaryOp::NE => Ok(JmlValue::bool(lhs != rhs)),
-        BinaryOp::GT => eval_ord_op(op, lhs, rhs).map_err(|e| e.into()),
-        BinaryOp::LT => eval_ord_op(op, lhs, rhs).map_err(|e| e.into()),
-        BinaryOp::GE => eval_ord_op(op, lhs, rhs).map_err(|e| e.into()),
-        BinaryOp::LE => eval_ord_op(op, lhs, rhs).map_err(|e| e.into()),
-        BinaryOp::Sum => (lhs + rhs).map_err(|e| e.into()),
+        BinaryOp::GT => eval_ord_op(op, lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                err: e,
+            }
+            .into()
+        }),
+        BinaryOp::LT => eval_ord_op(op, lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                err: e,
+            }
+            .into()
+        }),
+        BinaryOp::GE => eval_ord_op(op, lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                err: e,
+            }
+            .into()
+        }),
+        BinaryOp::LE => eval_ord_op(op, lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                err: e,
+            }
+            .into()
+        }),
+        BinaryOp::Sum => (lhs + rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                err: e,
+            }
+            .into()
+        }),
         BinaryOp::Sub => todo!(),
         BinaryOp::Mul => todo!(),
         BinaryOp::Div => todo!(),
@@ -36,7 +67,7 @@ pub fn eval_binary_op(
     }
 }
 
-fn eval_ord_op(op: BinaryOp, lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue, TypeError> {
+fn eval_ord_op(op: BinaryOp, lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue, TypeErrorKind> {
     let lhs_type = lhs.type_of();
     let rhs_type = rhs.type_of();
     if lhs_type == rhs_type {
@@ -48,7 +79,7 @@ fn eval_ord_op(op: BinaryOp, lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue, T
             _ => unreachable!(),
         }
     } else {
-        Err(TypeError::MismatchedTypes {
+        Err(TypeErrorKind::MismatchedTypes {
             expected: vec![lhs_type],
             found: rhs_type,
         })
