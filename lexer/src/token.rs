@@ -38,6 +38,9 @@ pub enum Token<'source> {
     #[token("if")]
     If,
 
+    #[token("then")]
+    Then,
+
     #[token("else")]
     Else,
 

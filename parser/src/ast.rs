@@ -55,6 +55,12 @@ pub enum ExpressionKind<'source> {
         lhs: Box<Expression<'source>>,
         rhs: Box<Expression<'source>>,
     },
+
+    IfExpr {
+        condition: Box<Expression<'source>>,
+        then_branch: Box<Expression<'source>>,
+        else_branch: Box<Expression<'source>>,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]

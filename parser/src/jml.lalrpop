@@ -22,8 +22,13 @@ pub Statement: Statement<'source> = {
 };
 
 pub Expression: Expression<'source> = {
-    ExpressionPrecedence9,
+    ExpressionPrecedence10,
     };
+
+ExpressionPrecedence10: Expression<'source> = {
+    IfExpr,
+    ExpressionPrecedence9,
+};
 
 ExpressionPrecedence9: Expression<'source> = {
     Or,
@@ -84,6 +89,18 @@ ExpressionPrecedence1: Expression<'source> = {
     Variable,
     "(" <Expression> ")",
 
+};
+
+IfExpr: Expression<'source> = {
+    <l:@L> IF <condition: ExpressionPrecedence10> THEN <then_branch: ExpressionPrecedence10> ELSE <else_branch: ExpressionPrecedence10> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::IfExpr {
+            condition: Box::new(condition),
+            then_branch: Box::new(then_branch),
+            else_branch: Box::new(else_branch),
+        }
+    }
 };
 
 Literal: Expression<'source> = {
@@ -359,6 +376,7 @@ extern {
         FILTEROBJ     => Token::FilterObject,
         FN            => Token::Fn,
         IF            => Token::If,
+        THEN          => Token::Then,
         ELSE          => Token::Else,
         READ          => Token::Read,
         WRITE         => Token::Write,
