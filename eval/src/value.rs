@@ -110,8 +110,19 @@ impl JmlValue {
         self.type_of().is_number()
     }
 
+    pub fn is_bool(&self) -> bool {
+        self.type_of().is_bool()
+    }
+
     pub fn is_comparable(&self) -> bool {
         self.type_of().is_comparable()
+    }
+
+    pub fn is_truthy(&self) -> bool {
+        match self {
+            JmlValue::Bool(val) => val.is_truthy(),
+            _ => false,
+        }
     }
 }
 

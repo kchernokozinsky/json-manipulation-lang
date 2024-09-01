@@ -1,4 +1,5 @@
 use binary_op::eval_binary_op;
+use if_expr::eval_if_expr;
 use parser::ast::Expression;
 
 use crate::{
@@ -8,6 +9,7 @@ use crate::{
 };
 
 pub mod binary_op;
+pub mod if_expr;
 pub mod list_constructor;
 pub mod unary_op;
 
@@ -38,5 +40,10 @@ pub fn eval_expr<'a>(expression: Expression, ctx: &Context<'a>) -> Result<JmlVal
         parser::ast::ExpressionKind::BinaryOp { op, lhs, rhs } => {
             eval_binary_op(op, *lhs, *rhs, ctx)
         }
+        parser::ast::ExpressionKind::IfExpr {
+            condition,
+            then_branch,
+            else_branch,
+        } => eval_if_expr(*condition, *then_branch, *else_branch, ctx),
     }
 }

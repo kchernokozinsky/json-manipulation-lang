@@ -20,6 +20,10 @@ impl JmlType {
     pub fn is_number(self) -> bool {
         matches!(self, JmlType::Float | JmlType::Int)
     }
+
+    pub fn is_bool(self) -> bool {
+        matches!(self, JmlType::Bool)
+    }
 }
 
 impl fmt::Display for JmlType {

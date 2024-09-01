@@ -3,6 +3,12 @@ use std::{fmt, str::FromStr};
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub struct JmlBool(bool);
 
+impl JmlBool {
+    pub fn is_truthy(&self) -> bool {
+        self.0
+    }
+}
+
 impl FromStr for JmlBool {
     type Err = <bool as FromStr>::Err;
 
