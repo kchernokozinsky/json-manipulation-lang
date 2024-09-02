@@ -1,17 +1,17 @@
-use eval::{context, error, eval, value::JmlValue};
-use miette::{Context, GraphicalReportHandler, IntoDiagnostic, Result};
+use std::fs;
+
+use eval::{context, eval};
+use miette::Result;
 
 fn main() -> Result<()> {
-    let source = r#"
-    a = true
-    ---
-    if false then 5 + 3 else 4
-    "#;
-    let ast = parser::parse(source).unwrap();
+    let source = fs::read_to_string("/Users/chernokozinskiy/Documents/Pets/json-manipulation-lang/examples/test1.jml")
+    .expect("Should have been able to read the file");
+
+    let ast = parser::parse(&source).unwrap();
     let mut ctx = context::Context::new();
 
-    let k = eval(ast, &mut ctx).map_err(|e| e.with_source_code(source))?;
-    dbg!(k);
+    let result = eval(ast, &mut ctx).map_err(|e| e.with_source_code(source))?;
+    println!("{result}");
 
     Ok(())
 }

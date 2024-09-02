@@ -9,7 +9,10 @@ use integer::JmlInt;
 use list::JmlList;
 use string::JmlString;
 
-use crate::{error::TypeErrorKind, jml_type::JmlType};
+use crate::{
+    error::TypeErrorKind,
+    jml_type::JmlType,
+};
 
 pub mod bool;
 pub mod float;
@@ -31,6 +34,20 @@ pub enum JmlValue {
 impl From<JmlBool> for JmlValue {
     fn from(value: JmlBool) -> Self {
         JmlValue::Bool(value)
+    }
+}
+
+impl TryFrom<JmlValue> for i64 {
+    type Error = TypeErrorKind;
+
+    fn try_from(value: JmlValue) -> Result<Self, Self::Error> {
+        match value {
+            JmlValue::Int(v) => Ok(v.0),
+            _ => Err(TypeErrorKind::MismatchedTypes {
+                expected: vec![JmlType::Int],
+                found: value.type_of(),
+            }),
+        }
     }
 }
 
@@ -78,6 +95,10 @@ impl JmlValue {
 
     pub fn float(value: impl Into<JmlFloat>) -> JmlValue {
         Self::Float(value.into())
+    }
+
+    pub fn list(value: impl Into<JmlList>) -> JmlValue {
+        Self::List(value.into())
     }
 
     pub fn int(value: impl Into<JmlInt>) -> JmlValue {
