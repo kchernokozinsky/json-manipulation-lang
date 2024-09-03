@@ -6,11 +6,15 @@ grammar<'source>(source: &'source str);
 
 
 pub Jml: Jml<'source> = {
-    <header: Statement*> HEADER <body:Expression> => Jml{
-        header: header, 
+    <header: Header?> <body:Expression> => Jml{
+        header: header.unwrap_or(vec![]), 
         body
     }  
 };
+
+pub Header: Vec<Statement<'source>> = {
+    <header: Statement+> HEADER => header
+}
 
 pub Statement: Statement<'source> = {
     <l:@L> <identifier:Identifier> "=" <expression:Expression> <r:@L> => Statement
