@@ -80,7 +80,13 @@ pub fn eval_expr(expression: Expression, ctx: &Context) -> Result<JmlValue, Eval
                 }
             }
         }
-        parser::ast::ExpressionKind::Selector { target, key } => todo!(),
+        parser::ast::ExpressionKind::Selector { target, key } => {
+            let val = eval_expr(*target, ctx)?;
+            match val {
+                JmlValue::Object(ob) => Ok(ob.access_by_key(key)),
+                _ => todo!(),
+            }
+        }
         parser::ast::ExpressionKind::UnaryOp { op, expr } => todo!(),
         parser::ast::ExpressionKind::BinaryOp { op, lhs, rhs } => {
             eval_binary_op(op, *lhs, *rhs, ctx)

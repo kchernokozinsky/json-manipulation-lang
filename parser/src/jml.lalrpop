@@ -146,14 +146,15 @@ Index: Expression<'source> = {
 };
 
 Selector: Expression<'source> = {
-   <l:@L> <target: ExpressionPrecedence1> "." <key: String> <r:@L> => Expression {
+   <l:@L> <target: ExpressionPrecedence1> "." <key: Key> <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::Selector{
             target: target.into(),
-            key: key.into()
+            key
         }
-    }
+    },
+
 };
 
 Concat: Expression<'source> = { 
@@ -340,13 +341,22 @@ Float: Expression<'source> = {
 };
 
 Object: Expression<'source> = {
-    <l:@L> "{" <pairs:Comma<(<STRING_LITERAL> ":" <Expression>)>> "}" <r:@L> => Expression {
+    <l:@L> "{" <pairs:Comma<(KeyValue)>> "}" <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::Object(pairs.into_iter()
                                             .collect()),
     }
 };
+
+KeyValue: (&'source str, Expression<'source>) = {
+    <s: Key> ":" <expr: Expression> => (s, expr),
+}
+
+Key: &'source str = {
+    <s: STRING_LITERAL> => s,
+    <s: IDENTIFIER> => s
+}
 
 List: Expression<'source> = {
     <l:@L> "[" <elems:Comma<Expression>> "]" <r:@L> => Expression {

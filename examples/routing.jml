@@ -1,0 +1,10 @@
+
+cond = false
+
+some_int = 5
+
+---
+
+if cond then "a" 
+         else if some_int % 2 == 1 then "b"
+                                   else "c"

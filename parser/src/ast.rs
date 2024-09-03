@@ -42,7 +42,7 @@ pub enum ExpressionKind<'source> {
     },
     Selector {
         target: Box<Expression<'source>>,
-        key: Box<Expression<'source>>,
+        key: &'source str,
     },
 
     UnaryOp {

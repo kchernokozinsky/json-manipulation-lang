@@ -27,9 +27,7 @@ pub struct TypeError {
 #[derive(Debug, Error, Diagnostic, Clone)]
 pub enum TypeErrorKind {
     #[error("Mismatched types: expected {expected:?}, found {found:?}")]
-    #[diagnostic(
-        code(type_error::mismatched_types)
-    )]
+    #[diagnostic(code(type_error::mismatched_types))]
     MismatchedTypes {
         expected: Vec<JmlType>,
         found: JmlType,

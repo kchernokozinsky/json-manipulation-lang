@@ -9,7 +9,7 @@ pub fn eval_stmt<'a>(stmt: Statement<'a>, ctx: &mut Context<'a>) -> Result<(), E
         StatementKind::Bind {
             identifier,
             expression,
-        } => ctx.bind_with_expr(identifier.node.to_owned(), expression),
+        } => ctx.bind_with_expr(identifier.node.to_string(), expression),
     }
 
     Ok(())
