@@ -114,6 +114,9 @@ pub enum Token<'source> {
     #[token("/")]
     Slash,
 
+    #[token("\\")]
+    BackSlash,
+
     #[token("==")]
     Equal,
 

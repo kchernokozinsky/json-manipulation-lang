@@ -96,5 +96,7 @@ pub fn eval_expr(expression: Expression, ctx: &Context) -> Result<JmlValue, Eval
             then_branch,
             else_branch,
         } => eval_if_expr(*condition, *then_branch, *else_branch, ctx),
+        parser::ast::ExpressionKind::Lambda { params, body } => todo!(),
+        parser::ast::ExpressionKind::Apply { lambda, args } => todo!(),
     }
 }

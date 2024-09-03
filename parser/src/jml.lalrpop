@@ -4,7 +4,6 @@ use crate::ast::{ExpressionKind, Expression, Statement, StatementKind, Identifie
 
 grammar<'source>(source: &'source str);
 
-
 pub Jml: Jml<'source> = {
     <header: Header?> <body:Expression> => Jml{
         header: header.unwrap_or(vec![]), 
@@ -26,6 +25,7 @@ pub Statement: Statement<'source> = {
 };
 
 pub Expression: Expression<'source> = {
+    Lambda,
     ExpressionPrecedence10,
     };
 
@@ -88,6 +88,7 @@ ExpressionPrecedence2: Expression<'source> = {
 };
 
 ExpressionPrecedence1: Expression<'source> = {
+    Apply,
     Object,
     List,
     Literal,
@@ -340,6 +341,28 @@ Float: Expression<'source> = {
     }
 };
 
+Lambda: Expression<'source> = {
+    <l:@L> "\\" <parameters: Identifier*> "." <body: ExpressionPrecedence10> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Lambda{
+            params: parameters,
+            body: Box::new(body)
+        },
+    }
+};
+
+Apply: Expression<'source> = {
+    <l:@L> <function: ExpressionPrecedence1> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Apply {
+            lambda: Box::new(function),
+            args,
+        }
+    }
+};
+
 Object: Expression<'source> = {
     <l:@L> "{" <pairs:Comma<(KeyValue)>> "}" <r:@L> => Expression {
         l,
@@ -356,7 +379,7 @@ KeyValue: (&'source str, Expression<'source>) = {
 Key: &'source str = {
     <s: STRING_LITERAL> => s,
     <s: IDENTIFIER> => s
-}
+};
 
 List: Expression<'source> = {
     <l:@L> "[" <elems:Comma<Expression>> "]" <r:@L> => Expression {
@@ -430,6 +453,7 @@ extern {
         "-"             => Token::Minus,
         "*"             => Token::Star,
         "/"             => Token::Slash,
+        "\\"            => Token::BackSlash,
         "=="            => Token::Equal,
         "!="            => Token::NotEqual,
         "<"             => Token::LessThan,

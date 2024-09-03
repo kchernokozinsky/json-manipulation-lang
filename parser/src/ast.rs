@@ -61,6 +61,14 @@ pub enum ExpressionKind<'source> {
         then_branch: Box<Expression<'source>>,
         else_branch: Box<Expression<'source>>,
     },
+    Lambda {
+        params: Vec<Identifier<'source>>,
+        body: Box<Expression<'source>>
+    },
+    Apply {
+        lambda: Box<Expression<'source>>,
+        args: Vec<Expression<'source>>,
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
