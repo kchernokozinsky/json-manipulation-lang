@@ -1,26 +1,29 @@
 use std::{
+    collections::HashMap,
     fmt::{self},
-    ops,
 };
 
 use bool::JmlBool;
 use float::JmlFloat;
 use integer::JmlInt;
 use list::JmlList;
+use object::JmlObject;
+use serde::{
+    de::{self, MapAccess, Visitor},
+    Deserialize, Deserializer, Serialize, Serializer,
+};
 use string::JmlString;
 
-use crate::{
-    error::TypeErrorKind,
-    jml_type::JmlType,
-};
+use crate::{error::TypeErrorKind, jml_type::JmlType};
 
 pub mod bool;
 pub mod float;
 pub mod integer;
 pub mod list;
+pub mod object;
 pub mod string;
 
-#[derive(Default, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub enum JmlValue {
     #[default]
     Null,
@@ -29,6 +32,7 @@ pub enum JmlValue {
     Int(JmlInt),
     List(JmlList),
     String(JmlString),
+    Object(JmlObject),
 }
 
 impl From<JmlBool> for JmlValue {
@@ -84,6 +88,7 @@ impl fmt::Display for JmlValue {
             JmlValue::List(v) => v.fmt(f),
             JmlValue::String(v) => v.fmt(f),
             JmlValue::Null => write!(f, "null"),
+            JmlValue::Object(v) => v.fmt(f),
         }
     }
 }
@@ -95,6 +100,10 @@ impl JmlValue {
 
     pub fn float(value: impl Into<JmlFloat>) -> JmlValue {
         Self::Float(value.into())
+    }
+
+    pub fn object(value: impl Into<JmlObject>) -> JmlValue {
+        Self::Object(value.into())
     }
 
     pub fn list(value: impl Into<JmlList>) -> JmlValue {
@@ -121,7 +130,7 @@ impl JmlValue {
             Self::Bool(_) => JmlType::Bool,
             Self::List(_) => JmlType::List,
             Self::String(_) => JmlType::String,
-            // Self::String(_) => JmlType::String,
+            Self::Object(_) => JmlType::Object,
             // Self::Function(_) => JmlType::Function,
             // Self::NativeFunction(_) => JmlType::Function,
         }
@@ -147,25 +156,94 @@ impl JmlValue {
     }
 }
 
-impl ops::Add<JmlValue> for JmlValue {
-    type Output = Result<JmlValue, TypeErrorKind>;
-
-    fn add(self, rhs: JmlValue) -> Result<JmlValue, TypeErrorKind> {
-        let lhs_type = self.type_of();
-        let rhs_type = rhs.type_of();
-        match (self, rhs) {
-            (JmlValue::Float(a), JmlValue::Float(b)) => Ok((a + b).into()),
-            (JmlValue::Float(a), JmlValue::Int(b)) => Ok((a + b).into()),
-            (JmlValue::Int(a), JmlValue::Int(b)) => Ok((a + b).into()),
-            (JmlValue::Int(a), JmlValue::Float(b)) => Ok((a + b).into()),
-            _ => Err(TypeErrorKind::MismatchedTypes {
-                expected: vec![JmlType::Float, JmlType::Int],
-                found: if lhs_type.is_number() {
-                    rhs_type
-                } else {
-                    lhs_type
-                },
-            }),
+impl Serialize for JmlValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            JmlValue::Null => serializer.serialize_none(),
+            JmlValue::Bool(JmlBool(b)) => serializer.serialize_bool(*b),
+            JmlValue::Float(JmlFloat(f)) => serializer.serialize_f64(*f),
+            JmlValue::Int(JmlInt(i)) => serializer.serialize_i64(*i),
+            JmlValue::String(JmlString(s)) => serializer.serialize_str(s),
+            JmlValue::List(JmlList(list)) => list.serialize(serializer),
+            JmlValue::Object(JmlObject(map)) => map.serialize(serializer),
         }
+    }
+}
+
+impl<'de> Deserialize<'de> for JmlValue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct JmlValueVisitor;
+
+        impl<'de> Visitor<'de> for JmlValueVisitor {
+            type Value = JmlValue;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a valid JSON value")
+            }
+
+            fn visit_bool<E>(self, v: bool) -> Result<Self::Value, E> {
+                Ok(JmlValue::Bool(JmlBool(v)))
+            }
+
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E> {
+                Ok(JmlValue::Int(JmlInt(v)))
+            }
+
+            fn visit_f64<E>(self, v: f64) -> Result<Self::Value, E> {
+                Ok(JmlValue::Float(JmlFloat(v)))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(JmlValue::String(JmlString(v.to_owned())))
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(JmlValue::String(JmlString(v)))
+            }
+
+            fn visit_none<E>(self) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(JmlValue::Null)
+            }
+
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(JmlValue::Null)
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: de::SeqAccess<'de>,
+            {
+                let values = Vec::deserialize(de::value::SeqAccessDeserializer::new(seq))?;
+                Ok(JmlValue::List(JmlList(values)))
+            }
+
+            fn visit_map<M>(self, map: M) -> Result<Self::Value, M::Error>
+            where
+                M: MapAccess<'de>,
+            {
+                let map = HashMap::deserialize(de::value::MapAccessDeserializer::new(map))?;
+                Ok(JmlValue::Object(JmlObject(map)))
+            }
+        }
+
+        deserializer.deserialize_any(JmlValueVisitor)
     }
 }

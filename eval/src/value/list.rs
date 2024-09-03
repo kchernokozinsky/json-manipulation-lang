@@ -2,9 +2,9 @@ use std::fmt;
 
 use super::JmlValue;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 
-pub struct JmlList(Vec<JmlValue>);
+pub struct JmlList(pub(crate) Vec<JmlValue>);
 
 impl From<Vec<JmlValue>> for JmlList {
     fn from(v: Vec<JmlValue>) -> Self {

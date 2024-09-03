@@ -17,6 +17,10 @@ impl JmlType {
         !matches!(self, JmlType::Lambda)
     }
 
+    pub fn is_ord(self) -> bool {
+        !matches!(self, JmlType::Lambda | JmlType::Object)
+    }
+
     pub fn is_number(self) -> bool {
         matches!(self, JmlType::Float | JmlType::Int)
     }

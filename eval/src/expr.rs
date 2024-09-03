@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use binary_op::eval_binary_op;
 use if_expr::eval_if_expr;
 use parser::ast::Expression;
@@ -22,7 +24,16 @@ pub fn eval_expr(expression: Expression, ctx: &Context) -> Result<JmlValue, Eval
         parser::ast::ExpressionKind::Bool(v) => Ok(JmlValue::bool(v)),
         parser::ast::ExpressionKind::Int(v) => Ok(JmlValue::int(v)),
         parser::ast::ExpressionKind::String(v) => Ok(JmlValue::string(v)),
-        parser::ast::ExpressionKind::Object(_) => todo!(),
+        parser::ast::ExpressionKind::Object(v) => {
+            let mut result_map = HashMap::new();
+
+            for (k, expr) in v {
+                let evaluated_value = eval_expr(expr, ctx)?;
+                result_map.insert(k.to_owned(), evaluated_value);
+            }
+
+            Ok(JmlValue::Object(result_map.into()))
+        }
         parser::ast::ExpressionKind::List(vals) => {
             let mut list: Vec<JmlValue> = vec![];
             for expr in vals {

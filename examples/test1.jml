@@ -1,5 +1,6 @@
 a = 5
 b = 6
+//d = if a < b then 5 + 3 
+//         else [["4", 3], 3, 6 + 3.5, if 5 > 3 then 5 else 3]
 ---
-if a < b then 5 + 3 + null
-         else [["4", 3], 3, 6 + 3.5, if 5 > 3 then 5 else 3]
+"b"

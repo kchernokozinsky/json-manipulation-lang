@@ -2,7 +2,7 @@ use std::{fmt, str::FromStr};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
 
-pub struct JmlString(String);
+pub struct JmlString(pub(crate) String);
 
 impl FromStr for JmlString {
     type Err = <String as FromStr>::Err;

@@ -1,7 +1,7 @@
 use std::{fmt, str::FromStr};
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
-pub struct JmlBool(bool);
+pub struct JmlBool(pub(crate) bool);
 
 impl JmlBool {
     pub fn is_truthy(&self) -> bool {

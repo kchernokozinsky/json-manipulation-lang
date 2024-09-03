@@ -1,6 +1,4 @@
-use std::{cmp::Ordering, fmt, ops, str::FromStr};
-
-use super::integer::JmlInt;
+use std::{fmt, str::FromStr};
 
 #[derive(Debug, Copy, Clone)]
 
@@ -13,20 +11,6 @@ impl PartialEq for JmlFloat {
 }
 
 impl Eq for JmlFloat {}
-
-impl PartialOrd for JmlFloat {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.0.partial_cmp(&other.0)
-    }
-}
-
-impl Ord for JmlFloat {
-    fn cmp(&self, other: &Self) -> Ordering {
-        // This will panic if either value is NaN
-        self.partial_cmp(other)
-            .expect("Cannot compare JmlFloat values with NaN")
-    }
-}
 
 impl FromStr for JmlFloat {
     type Err = <f64 as FromStr>::Err;
@@ -51,21 +35,5 @@ impl From<f32> for JmlFloat {
 impl fmt::Display for JmlFloat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
-    }
-}
-
-impl ops::Add<JmlFloat> for JmlFloat {
-    type Output = JmlFloat;
-
-    fn add(self, rhs: JmlFloat) -> JmlFloat {
-        JmlFloat(self.0 + rhs.0)
-    }
-}
-
-impl ops::Add<JmlInt> for JmlFloat {
-    type Output = JmlFloat;
-
-    fn add(self, rhs: JmlInt) -> JmlFloat {
-        JmlFloat(self.0 + rhs.0 as f64)
     }
 }
