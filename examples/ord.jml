@@ -1,0 +1,36 @@
+five = 5
+---
+{
+    "comparison_results": {
+        "gt": 6.5 > 5,
+        "lt": five < 6,
+        "ge": five >= 5,
+        "le": five <= 5,
+        "eq": 10 == 10,
+        "ne": 10 != 20
+    },
+    "nested_comparisons": {
+        "and_condition": {
+            "condition1": five < 6,
+            "condition2": 10 == 10,
+            "result": (5 < 6) && (10 == 10)
+        },
+        "or_condition": {
+            "condition1": 5 > 6,
+            "condition2": 10 == 10,
+            "result": (5 > 6) || (10 == 10)
+        }
+    },
+    "complex_operations": {
+        "arithmetic_and_comparison": {
+            "add_then_compare": (2 + 3) > 4,
+            "multiply_then_compare": (2 * 3) <= 6,
+            "subtract_then_compare": (10 - 4) == 6,
+            "divide_then_compare": (20 / 4) == 5
+        },
+        "mixed_types": {
+            "float_and_int": 6.0 >= 5,
+            "int_and_float": 5 <= 6.5
+        }
+    }
+}

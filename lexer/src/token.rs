@@ -96,6 +96,9 @@ pub enum Token<'source> {
     #[token("^")]
     Pow,
 
+    #[token("%")]
+    Mod,
+
     #[token("++")]
     Concat,
 

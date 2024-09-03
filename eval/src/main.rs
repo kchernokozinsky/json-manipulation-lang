@@ -5,7 +5,7 @@ use miette::Result;
 
 fn main() -> Result<()> {
     let source = fs::read_to_string(
-        "/Users/chernokozinskiy/Documents/Pets/json-manipulation-lang/examples/test1.jml",
+        "/Users/chernokozinskiy/Documents/Pets/json-manipulation-lang/examples/ord.jml",
     )
     .expect("Should have been able to read the file");
 

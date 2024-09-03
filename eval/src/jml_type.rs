@@ -18,7 +18,7 @@ impl JmlType {
     }
 
     pub fn is_ord(self) -> bool {
-        !matches!(self, JmlType::Lambda | JmlType::Object)
+        !matches!(self, JmlType::Lambda | JmlType::Object | JmlType::List)
     }
 
     pub fn is_number(self) -> bool {

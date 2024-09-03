@@ -148,9 +148,21 @@ impl JmlValue {
         self.type_of().is_comparable()
     }
 
+    pub fn is_ord(&self) -> bool {
+        self.type_of().is_ord()
+    }
+
     pub fn is_truthy(&self) -> bool {
         match self {
             JmlValue::Bool(val) => val.is_truthy(),
+            _ => false,
+        }
+    }
+
+    pub fn is_zero(&self) -> bool {
+        match self {
+            JmlValue::Float(v) => v.0 == 0.0,
+            JmlValue::Int(v) => v.0 == 0,
             _ => false,
         }
     }

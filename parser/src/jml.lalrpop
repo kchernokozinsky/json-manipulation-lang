@@ -64,6 +64,7 @@ ExpressionPrecedence5: Expression<'source> = {
 ExpressionPrecedence4: Expression<'source> = {
     Mul,
     Div,
+    Mod,
     ExpressionPrecedence3,
 };
 
@@ -259,6 +260,15 @@ Mul: Expression<'source> = {
         },
 }
 
+Mod: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence4> "%" <rhs:ExpressionPrecedence3> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Mod, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
 Div: Expression<'source> = { 
     <l:@L> <lhs:ExpressionPrecedence4> "/" <rhs:ExpressionPrecedence3> <r:@L> => Expression
         {
@@ -399,6 +409,7 @@ extern {
         BOOL_LITERAL    => Token::BoolLiteral(<bool>),
 
         // Operators
+        "%"             => Token::Mod,
         "^"             => Token::Pow,
         "++"            => Token::Concat,
         "+"             => Token::Plus,

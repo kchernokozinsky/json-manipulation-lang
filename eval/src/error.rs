@@ -24,12 +24,11 @@ pub struct TypeError {
     pub kind: TypeErrorKind,
 }
 
-#[derive(Debug, Error, Diagnostic)]
+#[derive(Debug, Error, Diagnostic, Clone)]
 pub enum TypeErrorKind {
     #[error("Mismatched types: expected {expected:?}, found {found:?}")]
     #[diagnostic(
-        code(type_error::mismatched_types),
-        help("Ensure that the types being compared or assigned are compatible.")
+        code(type_error::mismatched_types)
     )]
     MismatchedTypes {
         expected: Vec<JmlType>,
@@ -46,9 +45,20 @@ pub enum TypeErrorKind {
         actual_count: usize,
     },
 
-    #[error("Cannot compare types: {found}")]
-    #[diagnostic(code(type_error::not_comparable), help("Consider implementing comparison logic for the type '{found}' or avoid comparing incompatible types."))]
-    NotComparableType { found: JmlType },
+    #[error("Type {found} is not ordered")]
+    #[diagnostic(code(type_error::not_ordered))]
+    NotOrderedType { found: JmlType },
+
+    #[error("Binary operator '{operator}' cannot be applied to types {left:?} and {right:?}")]
+    #[diagnostic(
+        code(type_error::invalid_binary_operator),
+        help("Ensure the operator '{operator}' is used with compatible types.")
+    )]
+    InvalidBinaryOperator {
+        operator: String,
+        left: JmlType,
+        right: JmlType,
+    },
 }
 
 #[derive(Error, Diagnostic, Debug)]
@@ -62,7 +72,7 @@ pub struct RuntimeError {
     pub kind: RuntimeErrorKind,
 }
 
-#[derive(Debug, Error, Diagnostic)]
+#[derive(Debug, Error, Diagnostic, Clone)]
 #[diagnostic()]
 pub enum RuntimeErrorKind {
     #[error("Division by zero")]
@@ -78,6 +88,13 @@ pub enum RuntimeErrorKind {
         help("Check if the variable '{name}' is defined before using it.")
     )]
     UndefinedVariable { name: String },
+
+    #[error("Overflow occurred during evaluation.")]
+    #[diagnostic(
+        code(eval::overflow),
+        help("Consider using a larger data type or rethinking the operation to avoid overflow.")
+    )]
+    Overflow,
 
     #[error("{message}")]
     #[diagnostic(code(runtime_error::generic_runtime_error))]
