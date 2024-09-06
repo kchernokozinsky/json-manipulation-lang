@@ -16,6 +16,8 @@ use string::JmlString;
 
 use crate::{error::TypeErrorKind, jml_type::JmlType};
 
+use derive_more::{derive::Display, From};
+
 pub mod bool;
 pub mod float;
 pub mod integer;
@@ -23,9 +25,10 @@ pub mod list;
 pub mod object;
 pub mod string;
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Display, From)]
 pub enum JmlValue {
     #[default]
+    #[display("null")]
     Null,
     Bool(JmlBool),
     Float(JmlFloat),
@@ -33,12 +36,6 @@ pub enum JmlValue {
     List(JmlList),
     String(JmlString),
     Object(JmlObject),
-}
-
-impl From<JmlBool> for JmlValue {
-    fn from(value: JmlBool) -> Self {
-        JmlValue::Bool(value)
-    }
 }
 
 impl TryFrom<JmlValue> for i64 {
@@ -51,44 +48,6 @@ impl TryFrom<JmlValue> for i64 {
                 expected: vec![JmlType::Int],
                 found: value.type_of(),
             }),
-        }
-    }
-}
-
-impl From<JmlFloat> for JmlValue {
-    fn from(value: JmlFloat) -> Self {
-        JmlValue::Float(value)
-    }
-}
-
-impl From<JmlInt> for JmlValue {
-    fn from(value: JmlInt) -> Self {
-        JmlValue::Int(value)
-    }
-}
-
-impl From<JmlList> for JmlValue {
-    fn from(value: JmlList) -> Self {
-        JmlValue::List(value)
-    }
-}
-
-impl From<JmlString> for JmlValue {
-    fn from(value: JmlString) -> Self {
-        JmlValue::String(value)
-    }
-}
-
-impl fmt::Display for JmlValue {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            JmlValue::Bool(v) => v.fmt(f),
-            JmlValue::Float(v) => v.fmt(f),
-            JmlValue::Int(v) => v.fmt(f),
-            JmlValue::List(v) => v.fmt(f),
-            JmlValue::String(v) => v.fmt(f),
-            JmlValue::Null => write!(f, "null"),
-            JmlValue::Object(v) => v.fmt(f),
         }
     }
 }

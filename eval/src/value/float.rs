@@ -1,8 +1,8 @@
-use std::{fmt, str::FromStr};
+use derive_more::{derive::Display, From, FromStr};
 
-#[derive(Debug, Copy, Clone)]
-
-pub struct JmlFloat(pub(crate) f64);
+#[derive(Debug, Copy, Clone, From, Display, FromStr)]
+#[from(f64, f32, i32, i16, i8, u32, u16, u8)]
+pub struct JmlFloat(#[display("{}")] pub(crate) f64);
 
 impl PartialEq for JmlFloat {
     fn eq(&self, other: &Self) -> bool {
@@ -11,29 +11,3 @@ impl PartialEq for JmlFloat {
 }
 
 impl Eq for JmlFloat {}
-
-impl FromStr for JmlFloat {
-    type Err = <f64 as FromStr>::Err;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        FromStr::from_str(s).map(JmlFloat)
-    }
-}
-
-impl From<f64> for JmlFloat {
-    fn from(v: f64) -> Self {
-        JmlFloat(v)
-    }
-}
-
-impl From<f32> for JmlFloat {
-    fn from(v: f32) -> Self {
-        JmlFloat(v as f64)
-    }
-}
-
-impl fmt::Display for JmlFloat {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}

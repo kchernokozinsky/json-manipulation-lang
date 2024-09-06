@@ -1,16 +1,10 @@
 use std::fmt;
 
 use super::JmlValue;
+use derive_more::From;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-
+#[derive(Debug, Clone, PartialEq, Eq, From)]
 pub struct JmlList(pub(crate) Vec<JmlValue>);
-
-impl From<Vec<JmlValue>> for JmlList {
-    fn from(v: Vec<JmlValue>) -> Self {
-        JmlList(v)
-    }
-}
 
 impl JmlList {
     pub fn access_by_index(&self, index: usize) -> JmlValue {

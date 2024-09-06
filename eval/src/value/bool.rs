@@ -1,30 +1,10 @@
-use std::{fmt, str::FromStr};
+use derive_more::{derive::Display, From, FromStr};
 
-#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
-pub struct JmlBool(pub(crate) bool);
+#[derive(Debug, Copy, Clone, PartialEq, Eq, From, Display, FromStr)]
+pub struct JmlBool(#[display("{}")] pub(crate) bool);
 
 impl JmlBool {
     pub fn is_truthy(&self) -> bool {
         self.0
-    }
-}
-
-impl FromStr for JmlBool {
-    type Err = <bool as FromStr>::Err;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        FromStr::from_str(s).map(JmlBool)
-    }
-}
-
-impl From<bool> for JmlBool {
-    fn from(v: bool) -> Self {
-        JmlBool(v)
-    }
-}
-
-impl fmt::Display for JmlBool {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
     }
 }
