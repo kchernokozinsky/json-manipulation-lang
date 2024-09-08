@@ -1,3 +1,4 @@
+use derive_more::derive::Display;
 use errors::LexingError;
 use literal::{float, ident, int, string};
 use logos::Logos;
@@ -5,7 +6,7 @@ use logos::Logos;
 pub mod errors;
 mod literal;
 
-#[derive(Debug, Logos, PartialEq, Clone)]
+#[derive(Debug, Logos, PartialEq, Clone, Display)]
 #[logos(error = LexingError)]
 #[logos(skip r"[ \t\n\f]+")]
 #[logos(skip r"#[^\n]*\n")]

@@ -11,17 +11,24 @@ pub mod jml_type;
 pub mod stmt;
 pub mod value;
 
-pub fn eval<'a>(jml: Jml<'a>, ctx: &mut Context<'a>) -> miette::Result<JmlValue> {
+pub fn eval_with_ctx<'a>(jml: Jml<'a>, ctx: &mut Context<'a>) -> miette::Result<JmlValue> {
     for stmt in jml.header.into_iter() {
         eval_stmt(stmt, ctx)?;
     }
     eval_expr(jml.body, ctx).map_err(|e| e.into())
 }
 
-pub fn eval_with_default_ctx(jml: Jml<'_>) -> miette::Result<JmlValue> {
+pub fn eval_with_source(jml: Jml<'_>, source: &'static str) -> miette::Result<JmlValue> {
     let mut ctx = context::Context::new();
-    for stmt in jml.header.into_iter() {
-        eval_stmt(stmt, &mut ctx)?;
-    }
-    eval_expr(jml.body, &ctx).map_err(|e| e.into())
+
+    eval_with_ctx(jml, &mut ctx).map_err(|e| e.with_source_code(source))
 }
+
+pub fn eval_with_ctx_source(jml: Jml<'_>, source: &'static str) -> miette::Result<JmlValue> {
+    let mut ctx = context::Context::new();
+
+    eval_with_ctx(jml, &mut ctx).map_err(|e| e.with_source_code(source))
+}
+
+
+

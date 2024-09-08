@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use binary_op::eval_binary_op;
 use if_expr::eval_if_expr;
 use list_constructor::eval_list;
