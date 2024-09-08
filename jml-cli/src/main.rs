@@ -14,7 +14,7 @@ fn main() -> miette::Result<()> {
         cli::JmlCommand::Run { file, output } => {
             let source = fs::read_to_string(file).into_diagnostic()?.leak();
 
-            let ast = parser::parse(source).unwrap();
+            let ast = parser::parse(source).into_diagnostic()?;
             let res = eval::eval_with_source(ast, source)?;
 
             if let Some(output_path) = output {
