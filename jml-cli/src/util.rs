@@ -1,10 +1,10 @@
-use std::{fs::File, path::PathBuf};
+use std::{fs::File, path::Path};
 
 use miette::IntoDiagnostic;
 use serde::Serialize;
 
 pub fn write_output_to_json<T: Serialize>(
-    output_path: PathBuf,
+    output_path: impl AsRef<Path>,
     value: &T,
 ) -> Result<(), miette::Error> {
     let file = File::create(output_path).into_diagnostic()?;

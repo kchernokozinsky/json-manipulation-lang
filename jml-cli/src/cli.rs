@@ -4,9 +4,9 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(
-    author, 
-    version, 
-    about, 
+    author,
+    version,
+    about,
     long_about = "JML Command-Line Tool.",
     before_help = "                    
     __ _____ __    
