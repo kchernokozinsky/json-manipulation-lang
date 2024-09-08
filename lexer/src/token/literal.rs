@@ -4,6 +4,7 @@ use super::{errors::LexingError, Token};
 
 pub fn float<'source>(lex: &mut Lexer<'source, Token<'source>>) -> Result<f64, LexingError> {
     lex.slice().parse().map_err(|e| LexingError::InvalidFloat {
+        source: lex.source().into(),
         span: (lex.span().start, lex.span().end - lex.span().start).into(),
         e,
     })
@@ -13,6 +14,7 @@ pub fn int<'source>(lex: &mut Lexer<'source, Token<'source>>) -> Result<i64, Lex
     lex.slice()
         .parse()
         .map_err(|e| LexingError::InvalidInteger {
+            source: lex.source().into(),
             span: (lex.span().start, lex.span().end - lex.span().start).into(),
             e,
         })
