@@ -7,4 +7,8 @@ impl JmlBool {
     pub fn is_truthy(&self) -> bool {
         self.0
     }
+
+    pub fn not(&self) -> JmlBool {
+        JmlBool(!self.0)
+    }
 }

@@ -1,5 +1,5 @@
 use anyhow::Error;
-use miette::{Result, SourceSpan};
+use miette::Result;
 use parser::ast::{BinaryOp, Expression};
 
 use crate::{
@@ -11,45 +11,105 @@ use crate::{
 use super::eval_expr;
 
 pub fn eval_binary_op(
+    span: impl Into<miette::SourceSpan>,
     op: BinaryOp,
     lhs: Expression,
     rhs: Expression,
     ctx: &Context<'_>,
 ) -> Result<JmlValue, EvalError> {
-    let span: SourceSpan = (lhs.l, rhs.r - lhs.l).into();
     let lhs = eval_expr(lhs, ctx)?;
     let rhs = eval_expr(rhs, ctx)?;
 
     match op {
         BinaryOp::EQ => Ok(JmlValue::bool(lhs == rhs)),
         BinaryOp::NE => Ok(JmlValue::bool(lhs != rhs)),
-        BinaryOp::GT => greater(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::LT => less(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::GE => greater_equal(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::LE => less_equal(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::Sum => add(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::Sub => subtract(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::Mul => multiply(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
+        BinaryOp::GT => greater(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::LT => less(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::GE => greater_equal(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::LE => less_equal(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::Sum => add(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::Sub => subtract(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::Mul => multiply(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
         BinaryOp::Div => divide(lhs, rhs).map_err(|e| map_anyhow(e, span)),
         BinaryOp::Pow => pow(lhs, rhs).map_err(|e| map_anyhow(e, span)),
-        BinaryOp::Mod => mod_op(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::And => and(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
-        BinaryOp::Or => or(lhs, rhs).map_err(|e| TypeError { span, kind: e }.into()),
+        BinaryOp::Mod => mod_op(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::And => and(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
+        BinaryOp::Or => or(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
         BinaryOp::Concat => todo!(),
     }
 }
 
-fn map_anyhow(e: Error, span: SourceSpan) -> EvalError {
+fn map_anyhow(e: Error, span: impl Into<miette::SourceSpan>) -> EvalError {
     {
         if let Some(runtime_error) = e.downcast_ref::<RuntimeErrorKind>() {
             RuntimeError {
-                span,
+                span: span.into(),
                 kind: runtime_error.clone(),
             }
             .into()
         } else if let Some(type_error) = e.downcast_ref::<TypeErrorKind>() {
             TypeError {
-                span,
+                span: span.into(),
                 kind: type_error.clone(),
             }
             .into()

@@ -17,3 +17,11 @@ pub fn eval<'a>(jml: Jml<'a>, ctx: &mut Context<'a>) -> miette::Result<JmlValue>
     }
     eval_expr(jml.body, ctx).map_err(|e| e.into())
 }
+
+pub fn eval_with_default_ctx(jml: Jml<'_>) -> miette::Result<JmlValue> {
+    let mut ctx = context::Context::new();
+    for stmt in jml.header.into_iter() {
+        eval_stmt(stmt, &mut ctx)?;
+    }
+    eval_expr(jml.body, &ctx).map_err(|e| e.into())
+}

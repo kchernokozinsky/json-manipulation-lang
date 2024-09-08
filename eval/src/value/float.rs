@@ -1,3 +1,5 @@
+use std::ops::Neg;
+
 use derive_more::{derive::Display, From, FromStr};
 
 #[derive(Debug, Copy, Clone, From, Display, FromStr)]
@@ -7,6 +9,12 @@ pub struct JmlFloat(#[display("{}")] pub(crate) f64);
 impl PartialEq for JmlFloat {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
+    }
+}
+
+impl JmlFloat {
+    pub fn negative(self) -> Self {
+        JmlFloat(self.0.neg())
     }
 }
 

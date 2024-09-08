@@ -30,11 +30,17 @@ pub enum JmlValue {
     #[default]
     #[display("null")]
     Null,
+    #[from]
     Bool(JmlBool),
+    #[from]
     Float(JmlFloat),
+    #[from]
     Int(JmlInt),
+    #[from]
     List(JmlList),
+    #[from]
     String(JmlString),
+    #[from]
     Object(JmlObject),
 }
 

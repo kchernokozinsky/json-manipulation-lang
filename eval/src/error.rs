@@ -57,6 +57,13 @@ pub enum TypeErrorKind {
         left: JmlType,
         right: JmlType,
     },
+
+    #[error("Uanry operator '{operator}' cannot be applied to type {right:?}")]
+    #[diagnostic(
+        code(type_error::invalid_binary_operator),
+        help("Ensure the operator '{operator}' is used with compatible type.")
+    )]
+    InvalidUnaryOperator { operator: String, right: JmlType },
 }
 
 #[derive(Error, Diagnostic, Debug)]
