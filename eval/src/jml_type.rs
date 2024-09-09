@@ -47,9 +47,9 @@ impl fmt::Display for JmlType {
                 let params: String = (0..*arity)
                     .map(|i| ((b'a' + i as u8) as char).to_string())
                     .collect::<Vec<_>>()
-                    .join(" ");
+                    .join(", ");
 
-                &format!("lambda ({}) -> output", params)
+                &format!("Fn ({}) -> output", params)
             }
         };
         write!(f, "{}", type_name)

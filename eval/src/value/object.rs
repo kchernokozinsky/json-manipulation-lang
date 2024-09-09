@@ -5,15 +5,15 @@ use std::fmt;
 use super::JmlValue;
 
 #[derive(Debug, Clone, PartialEq, Eq, From)]
-pub struct JmlObject<'a>(pub(crate) HashMap<String, JmlValue<'a>>);
+pub struct JmlObject<'source>(pub(crate) HashMap<String, JmlValue<'source>>);
 
-impl<'a> JmlObject<'a> {
-    pub fn access_by_key(&self, key: &str) -> JmlValue<'a> {
+impl<'source> JmlObject<'source> {
+    pub fn access_by_key(&self, key: &str) -> JmlValue<'source> {
         self.0.get(key).map_or(JmlValue::null(), |v| v.clone())
     }
 }
 
-impl<'a> fmt::Display for JmlObject<'a> {
+impl<'source> fmt::Display for JmlObject<'source> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let entries: Vec<String> = self
             .0

@@ -47,7 +47,7 @@ pub enum TypeErrorKind {
     #[diagnostic(code(type_error::not_ordered))]
     NotOrderedType { found: JmlType },
 
-    #[error("Binary operator '{operator}' cannot be applied to types {left:?} and {right:?}")]
+    #[error("Binary operator '{operator}' cannot be applied to types {left} and {right}")]
     #[diagnostic(
         code(type_error::invalid_binary_operator),
         help("Ensure the operator '{operator}' is used with compatible types.")
