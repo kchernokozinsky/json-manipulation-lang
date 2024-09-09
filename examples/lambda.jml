@@ -1,6 +1,42 @@
+// Factorial function using a lambda expression.
+// This function takes `n` as input. If `n == 0`, it returns 1 (base case),
+// otherwise, it recursively calls itself with `n - 1` and multiplies the result by `n`.
+factorial = \n. if n == 0 then 1 else n * factorial(n - 1)
 
-sum = \a b. a + b 
+// Function that doubles the input `x`.
+double = \x. x * 2
+
+// Function that increments the input `x` by 1.
+increment = \x. x + 1
+
+// Function composition: This function first doubles the input `x` and then increments it by 1.
+// It applies the `double` function first and then applies `increment` on the result.
+double_then_increment = \x. increment(double(x))
+
+// Function to retrieve an element from an array.
+// It takes two inputs: `index` and `arr`, and returns the element at `index` in `arr`.
+get = \index arr. arr[index]
+
+// Function that squares the input `x`.
+square = \x. x * x
+
+// Function that calculates the sum of squares of two inputs `x` and `y`.
+// It squares both `x` and `y`, and then adds the results.
+sum_of_squares = \x y. square(x) + square(y)
+
+// Function that applies another function `f` twice to an input `x`.
+// For example, `apply_twice(increment, 5)` would increment 5 twice, resulting in 7.
+apply_twice = \f x. f(f(x))
+
+// Another definition of the `increment` function, which increments `x` by 1.
+increment = \x. x + 1
 
 ---
 
-sum(5, 3)
+{
+ fact: factorial(5),
+ double_then_increment: double_then_increment(2),
+ get: get (2, [1, 2, 3]),
+ squares: sum_of_squares(3, 4),
+ apply_twice: apply_twice(increment, 5)
+} 

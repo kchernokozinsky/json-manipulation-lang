@@ -10,13 +10,13 @@ use crate::{
 
 use super::eval_expr;
 
-pub fn eval_binary_op(
+pub fn eval_binary_op<'source>(
     span: impl Into<miette::SourceSpan>,
     op: BinaryOp,
-    lhs: Expression,
-    rhs: Expression,
-    ctx: &Context<'_>,
-) -> Result<JmlValue, EvalError> {
+    lhs: Expression<'source>,
+    rhs: Expression<'source>,
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError> {
     let lhs = eval_expr(lhs, ctx)?;
     let rhs = eval_expr(rhs, ctx)?;
 
@@ -121,7 +121,7 @@ fn map_anyhow(e: Error, span: impl Into<miette::SourceSpan>) -> EvalError {
 
 macro_rules! ord_op {
     ($func_name:ident, $operator:tt, $op_str:expr) => {
-        fn $func_name(lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue, TypeErrorKind> {
+        fn $func_name<'a>(lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue<'a>, TypeErrorKind> {
 
             if !&lhs.is_ord() {
                 Err(TypeErrorKind::NotOrderedType {found: lhs.type_of()})?
@@ -155,7 +155,7 @@ ord_op!(less_equal, <=, "<=");
 
 macro_rules! logical_op {
     ($func_name:ident, $operator:tt, $op_str:expr) => {
-        fn $func_name(lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue, TypeErrorKind> {
+        fn $func_name<'a>(lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue<'a>, TypeErrorKind> {
             match (&lhs, &rhs) {
                 (JmlValue::Bool(lhs), JmlValue::Bool(rhs)) => Ok(JmlValue::bool(lhs.0 $operator rhs.0)),
                 _ => Err(TypeErrorKind::InvalidBinaryOperator {
@@ -173,7 +173,7 @@ logical_op!(or, ||, "||");
 
 macro_rules! arithmetic_op {
     ($func_name:ident, /) => {
-        fn $func_name(lhs: JmlValue, rhs: JmlValue) -> anyhow::Result<JmlValue> {
+        fn $func_name<'a>(lhs: JmlValue, rhs: JmlValue) -> anyhow::Result<JmlValue<'a>> {
             if rhs.is_zero() {
                 Err(RuntimeErrorKind::DivisionByZero)?
             }
@@ -192,7 +192,7 @@ macro_rules! arithmetic_op {
         }
     };
     ($func_name:ident, ^) => {
-        fn $func_name(lhs: JmlValue, rhs: JmlValue) -> anyhow::Result<JmlValue> {
+        fn $func_name<'a>(lhs: JmlValue, rhs: JmlValue) -> anyhow::Result<JmlValue<'a>> {
             match (&lhs, &rhs) {
                 (JmlValue::Float(lhs), JmlValue::Float(rhs)) => Ok(JmlValue::float(lhs.0.powf(rhs.0))),
                 (JmlValue::Float(lhs), JmlValue::Int(rhs)) => Ok(JmlValue::float(lhs.0.powf(rhs.0 as f64))),
@@ -212,7 +212,7 @@ macro_rules! arithmetic_op {
         }
     };
     ($func_name:ident, $operator:tt, $op_str:expr) => {
-        fn $func_name(lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue, TypeErrorKind> {
+        fn $func_name<'a>(lhs: JmlValue, rhs: JmlValue) -> Result<JmlValue<'a>, TypeErrorKind> {
             match (&lhs, &rhs) {
                 (JmlValue::Float(lhs), JmlValue::Float(rhs)) => Ok(JmlValue::float(lhs.0 $operator rhs.0)),
                 (JmlValue::Float(lhs), JmlValue::Int(rhs)) => Ok(JmlValue::float(lhs.0 $operator rhs.0 as f64)),

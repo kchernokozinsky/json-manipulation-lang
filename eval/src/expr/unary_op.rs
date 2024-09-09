@@ -9,12 +9,12 @@ use crate::{
 
 use super::eval_expr;
 
-pub fn eval_unary_op(
+pub fn eval_unary_op<'source>(
     span: impl Into<miette::SourceSpan>,
     op: UnaryOp,
-    rhs: Expression,
-    ctx: &Context<'_>,
-) -> Result<JmlValue, EvalError> {
+    rhs: Expression<'source>,
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError> {
     let rhs = eval_expr(rhs, ctx)?;
     match op {
         UnaryOp::Minus => match rhs {

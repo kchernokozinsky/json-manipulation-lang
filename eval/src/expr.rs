@@ -1,5 +1,6 @@
 use binary_op::eval_binary_op;
 use if_expr::eval_if_expr;
+use lambda::{eval_lambda_application, eval_lambda_defenition};
 use list_constructor::eval_list;
 use object_constructor::eval_object;
 use parser::ast::Expression;
@@ -14,11 +15,15 @@ use crate::{
 
 pub mod binary_op;
 pub mod if_expr;
+pub mod lambda;
 pub mod list_constructor;
 pub mod object_constructor;
 pub mod unary_op;
 
-pub fn eval_expr(expression: Expression, ctx: &Context) -> Result<JmlValue, EvalError> {
+pub fn eval_expr<'source>(
+    expression: Expression<'source>,
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError> {
     let Expression { l, r, node } = expression;
     let span = (l, r - l);
     match node {
@@ -84,20 +89,24 @@ pub fn eval_expr(expression: Expression, ctx: &Context) -> Result<JmlValue, Eval
             then_branch,
             else_branch,
         } => eval_if_expr(*condition, *then_branch, *else_branch, ctx),
-        parser::ast::ExpressionKind::Lambda { params, body } => todo!(),
-        parser::ast::ExpressionKind::Apply { lambda, args } => todo!(),
+        parser::ast::ExpressionKind::Lambda { params, body } => {
+            eval_lambda_defenition(params, *body)
+        }
+        parser::ast::ExpressionKind::Apply { lambda, args } => {
+            eval_lambda_application(span, *lambda, args, ctx)
+        }
     }
 }
 
-fn eval_variable(
+fn eval_variable<'source>(
     span: impl Into<miette::SourceSpan>,
     ident: &str,
-    ctx: &Context,
-) -> Result<JmlValue, EvalError> {
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError> {
     match ctx.lookup_variable(ident) {
         Ok(bind) => match bind {
             crate::context::Binding::Expression(expr) => eval_expr(expr, ctx),
-            crate::context::Binding::Value(value) => Ok(value),
+            crate::context::Binding::Value(value) => Ok(value.clone()),
         },
         Err(e) => Err(RuntimeError {
             span: span.into(),

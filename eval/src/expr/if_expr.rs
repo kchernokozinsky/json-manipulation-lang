@@ -8,12 +8,12 @@ use crate::{
 };
 
 use super::eval_expr;
-pub fn eval_if_expr(
-    condition: Expression,
-    then_branch: Expression,
-    else_branch: Expression,
-    ctx: &Context<'_>,
-) -> Result<JmlValue, EvalError> {
+pub fn eval_if_expr<'source>(
+    condition: Expression<'source>,
+    then_branch: Expression<'source>,
+    else_branch: Expression<'source>,
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError> {
     let cond_l = condition.l;
     let cond_r = condition.r;
     let cond = eval_expr(condition, ctx)?;

@@ -6,10 +6,10 @@ use crate::{context::Context, error::EvalError, value::JmlValue};
 
 use super::eval_expr;
 
-pub(crate) fn eval_object(
-    data: HashMap<&str, Expression>,
-    ctx: &Context<'_>,
-) -> Result<JmlValue, EvalError> {
+pub(crate) fn eval_object<'source>(
+    data: HashMap<&str, Expression<'source>>,
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError> {
     let mut result_map = HashMap::new();
 
     for (k, expr) in data {

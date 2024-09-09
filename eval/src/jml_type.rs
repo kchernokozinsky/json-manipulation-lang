@@ -9,16 +9,19 @@ pub enum JmlType {
     Float,
     List,
     Object,
-    Lambda,
+    Lambda { arity: usize },
 }
 
 impl JmlType {
     pub fn is_comparable(self) -> bool {
-        !matches!(self, JmlType::Lambda)
+        !matches!(self, JmlType::Lambda { .. })
     }
 
     pub fn is_ord(self) -> bool {
-        !matches!(self, JmlType::Lambda | JmlType::Object | JmlType::List)
+        !matches!(
+            self,
+            JmlType::Lambda { .. } | JmlType::Object | JmlType::List
+        )
     }
 
     pub fn is_number(self) -> bool {
@@ -40,7 +43,14 @@ impl fmt::Display for JmlType {
             JmlType::Float => "Float",
             JmlType::List => "List",
             JmlType::Object => "Object",
-            JmlType::Lambda => "Lambda",
+            JmlType::Lambda { arity } => {
+                let params: String = (0..*arity)
+                    .map(|i| ((b'a' + i as u8) as char).to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ");
+
+                &format!("lambda ({}) -> output", params)
+            }
         };
         write!(f, "{}", type_name)
     }

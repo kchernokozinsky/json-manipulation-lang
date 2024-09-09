@@ -6,6 +6,7 @@ use std::{
 use bool::JmlBool;
 use float::JmlFloat;
 use integer::JmlInt;
+use lambda::JmlLambda;
 use list::JmlList;
 use object::JmlObject;
 use serde::{
@@ -21,12 +22,13 @@ use derive_more::{derive::Display, From};
 pub mod bool;
 pub mod float;
 pub mod integer;
+pub mod lambda;
 pub mod list;
 pub mod object;
 pub mod string;
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Display, From)]
-pub enum JmlValue {
+pub enum JmlValue<'source> {
     #[default]
     #[display("null")]
     Null,
@@ -37,14 +39,16 @@ pub enum JmlValue {
     #[from]
     Int(JmlInt),
     #[from]
-    List(JmlList),
+    List(JmlList<'source>),
     #[from]
     String(JmlString),
     #[from]
-    Object(JmlObject),
+    Object(JmlObject<'source>),
+    #[from]
+    Lambda(JmlLambda<'source>),
 }
 
-impl TryFrom<JmlValue> for i64 {
+impl<'source> TryFrom<JmlValue<'source>> for i64 {
     type Error = TypeErrorKind;
 
     fn try_from(value: JmlValue) -> Result<Self, Self::Error> {
@@ -58,32 +62,32 @@ impl TryFrom<JmlValue> for i64 {
     }
 }
 
-impl JmlValue {
-    pub fn null() -> JmlValue {
+impl<'source> JmlValue<'source> {
+    pub fn null() -> JmlValue<'source> {
         JmlValue::Null
     }
 
-    pub fn float(value: impl Into<JmlFloat>) -> JmlValue {
+    pub fn float(value: impl Into<JmlFloat>) -> JmlValue<'source> {
         Self::Float(value.into())
     }
 
-    pub fn object(value: impl Into<JmlObject>) -> JmlValue {
+    pub fn object(value: impl Into<JmlObject<'source>>) -> JmlValue<'source> {
         Self::Object(value.into())
     }
 
-    pub fn list(value: impl Into<JmlList>) -> JmlValue {
+    pub fn list(value: impl Into<JmlList<'source>>) -> JmlValue<'source> {
         Self::List(value.into())
     }
 
-    pub fn int(value: impl Into<JmlInt>) -> JmlValue {
+    pub fn int(value: impl Into<JmlInt>) -> JmlValue<'source> {
         Self::Int(value.into())
     }
 
-    pub fn bool(value: impl Into<JmlBool>) -> JmlValue {
+    pub fn bool(value: impl Into<JmlBool>) -> JmlValue<'source> {
         Self::Bool(value.into())
     }
 
-    pub fn string(value: impl Into<JmlString>) -> JmlValue {
+    pub fn string(value: impl Into<JmlString>) -> JmlValue<'source> {
         Self::String(value.into())
     }
 
@@ -96,7 +100,9 @@ impl JmlValue {
             Self::List(_) => JmlType::List,
             Self::String(_) => JmlType::String,
             Self::Object(_) => JmlType::Object,
-            // Self::Function(_) => JmlType::Function,
+            Self::Lambda(JmlLambda { params, .. }) => JmlType::Lambda {
+                arity: params.len(),
+            },
             // Self::NativeFunction(_) => JmlType::Function,
         }
     }
@@ -133,7 +139,7 @@ impl JmlValue {
     }
 }
 
-impl Serialize for JmlValue {
+impl<'a> Serialize for JmlValue<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -146,11 +152,12 @@ impl Serialize for JmlValue {
             JmlValue::String(JmlString(s)) => serializer.serialize_str(s),
             JmlValue::List(JmlList(list)) => list.serialize(serializer),
             JmlValue::Object(JmlObject(map)) => map.serialize(serializer),
+            JmlValue::Lambda(_) => todo!(),
         }
     }
 }
 
-impl<'de> Deserialize<'de> for JmlValue {
+impl<'de> Deserialize<'de> for JmlValue<'de> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
@@ -158,7 +165,7 @@ impl<'de> Deserialize<'de> for JmlValue {
         struct JmlValueVisitor;
 
         impl<'de> Visitor<'de> for JmlValueVisitor {
-            type Value = JmlValue;
+            type Value = JmlValue<'de>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("a valid JSON value")
