@@ -36,7 +36,8 @@ impl<'source> Context<'source> {
         self.bindings.insert(name, RefCell::new(Binding::new(expr)));
     }
 
-    pub fn bind_with_value(&mut self, name: String, value: JmlValue<'source>) {
+    pub fn bind_with_value(&mut self, name: String, value: impl Into<JmlValue<'source>>) {
+        let value = value.into();
         self.bindings
             .entry(name)
             .and_modify(|e| *e.get_mut() = Binding::new_with_value(value.clone()))

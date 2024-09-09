@@ -1,11 +1,11 @@
 use derive_more::From;
-use std::collections::HashMap;
+use indexmap::IndexMap;
 use std::fmt;
 
 use super::JmlValue;
 
 #[derive(Debug, Clone, PartialEq, Eq, From)]
-pub struct JmlObject<'source>(pub(crate) HashMap<String, JmlValue<'source>>);
+pub struct JmlObject<'source>(pub(crate) IndexMap<String, JmlValue<'source>>);
 
 impl<'source> JmlObject<'source> {
     pub fn access_by_key(&self, key: &str) -> JmlValue<'source> {

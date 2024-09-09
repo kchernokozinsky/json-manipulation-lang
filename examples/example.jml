@@ -1,10 +1,5 @@
-a = 5
-b = 6
-d = if a < 6 then 5 % 2
-       else [["4", 3], 3]
----
 {
-    "a": a, 
-    "b": b,
-    "d": d
+    payload: payload
 }
+
+// cargo run -- run -v payload=https://jsonplaceholder.typicode.com/todos/1  -f ../examples/example.jml

@@ -5,6 +5,7 @@ use std::{
 
 use bool::JmlBool;
 use float::JmlFloat;
+use indexmap::IndexMap;
 use integer::JmlInt;
 use lambda::JmlLambda;
 use list::JmlList;
@@ -13,6 +14,7 @@ use serde::{
     de::{self, MapAccess, Visitor},
     Deserialize, Deserializer, Serialize, Serializer,
 };
+use serde_json::Value;
 use string::JmlString;
 
 use crate::{errors::TypeErrorKind, jml_type::JmlType};
@@ -46,6 +48,39 @@ pub enum JmlValue<'source> {
     Object(JmlObject<'source>),
     #[from]
     Lambda(JmlLambda<'source>),
+}
+
+impl From<Value> for JmlValue<'_> {
+    fn from(value: Value) -> Self {
+        match value {
+            Value::Null => JmlValue::Null,
+            Value::Bool(b) => JmlValue::bool(b),
+            Value::Number(n) => {
+                if let Some(i) = n.as_i64() {
+                    JmlValue::Int(JmlInt(i))
+                } else if let Some(f) = n.as_f64() {
+                    JmlValue::Float(JmlFloat(f))
+                } else {
+                    JmlValue::Null
+                }
+            }
+
+            Value::String(s) => JmlValue::string(s),
+
+            Value::Array(arr) => {
+                let list = arr.into_iter().map(JmlValue::from).collect();
+                JmlValue::List(JmlList(list))
+            }
+
+            Value::Object(obj) => {
+                let object = obj
+                    .into_iter()
+                    .map(|(k, v)| (k, JmlValue::from(v)))
+                    .collect();
+                JmlValue::Object(JmlObject(object))
+            }
+        }
+    }
 }
 
 impl<'source> TryFrom<JmlValue<'source>> for i64 {
@@ -103,7 +138,6 @@ impl<'source> JmlValue<'source> {
             Self::Lambda(JmlLambda { params, .. }) => JmlType::Lambda {
                 arity: params.len(),
             },
-            // Self::NativeFunction(_) => JmlType::Function,
         }
     }
 
@@ -223,7 +257,8 @@ impl<'de> Deserialize<'de> for JmlValue<'de> {
             where
                 M: MapAccess<'de>,
             {
-                let map = HashMap::deserialize(de::value::MapAccessDeserializer::new(map))?;
+                let map = IndexMap::deserialize(de::value::MapAccessDeserializer::new(map))?;
+
                 Ok(JmlValue::Object(JmlObject(map)))
             }
         }

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use indexmap::IndexMap;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Located<T> {
@@ -33,7 +33,7 @@ pub enum ExpressionKind<'source> {
     Bool(bool),
     Int(i64),
     String(&'source str),
-    Object(HashMap<&'source str, Expression<'source>>),
+    Object(IndexMap<&'source str, Expression<'source>>),
     List(Vec<Expression<'source>>),
     Variable(&'source str),
     IndexAccess {

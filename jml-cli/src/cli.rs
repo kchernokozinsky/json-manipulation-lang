@@ -36,5 +36,24 @@ pub enum JmlCommand {
         /// to this output file in JSON format.
         #[arg(short, long, help = "Output file for JSON result.")]
         output: Option<PathBuf>,
+
+        /// Provide multiple variables and their corresponding JSON paths (URL or file).
+        ///
+        /// You can specify multiple variables by repeating the `--variable` flag,
+        /// each specifying a variable name and its corresponding JSON value path.
+        #[arg(short, long, value_parser = parse_variable, help = "Variable names and JSON files or URLs")]
+        variables: Vec<(String, String)>,
     },
+}
+
+fn parse_variable(s: &str) -> Result<(String, String), String> {
+    let parts: Vec<&str> = s.splitn(2, '=').collect();
+    if parts.len() == 2 {
+        Ok((parts[0].to_string(), parts[1].to_string()))
+    } else {
+        Err(format!(
+            "Invalid variable format: '{}'. Expected format 'name=path'.",
+            s
+        ))
+    }
 }
