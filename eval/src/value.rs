@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    fmt::{self},
-};
+use std::fmt::{self};
 
 use bool::JmlBool;
 use float::JmlFloat;

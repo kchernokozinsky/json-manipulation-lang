@@ -1,7 +1,6 @@
 use context::Context;
 use expr::eval_expr;
 use parser::ast::Jml;
-use stdlib::define_std_lib;
 use stmt::eval_stmt;
 use value::JmlValue;
 
