@@ -1,6 +1,8 @@
+use errors::LexingError;
 use logos::{Logos, SpannedIter};
-use token::{errors::LexingError, Token};
+use token::Token;
 
+pub mod errors;
 pub mod token;
 
 pub struct Lexer<'source> {

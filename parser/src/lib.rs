@@ -1,8 +1,5 @@
 use lalrpop_util::{lalrpop_mod, ParseError};
-use lexer::{
-    token::{errors::LexingError, Token},
-    Lexer,
-};
+use lexer::{errors::LexingError, token::Token, Lexer};
 
 pub mod ast;
 lalrpop_mod!(

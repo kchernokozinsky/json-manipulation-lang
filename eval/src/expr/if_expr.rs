@@ -2,7 +2,7 @@ use parser::ast::Expression;
 
 use crate::{
     context::Context,
-    error::{EvalError, TypeError, TypeErrorKind},
+    errors::{EvalError, TypeError, TypeErrorKind},
     jml_type::JmlType,
     value::JmlValue,
 };

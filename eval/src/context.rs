@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::HashMap};
 
 use parser::ast::Expression;
 
-use crate::{error::RuntimeErrorKind, value::JmlValue};
+use crate::{errors::RuntimeErrorKind, value::JmlValue};
 
 #[derive(Debug, Default, Clone)]
 pub struct Context<'source> {

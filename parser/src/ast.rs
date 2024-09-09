@@ -63,12 +63,12 @@ pub enum ExpressionKind<'source> {
     },
     Lambda {
         params: Vec<Identifier<'source>>,
-        body: Box<Expression<'source>>
+        body: Box<Expression<'source>>,
     },
     Apply {
         lambda: Box<Expression<'source>>,
         args: Vec<Expression<'source>>,
-    }
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]

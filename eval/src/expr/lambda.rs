@@ -2,7 +2,7 @@ use parser::ast::{Expression, Identifier};
 
 use crate::{
     context::Context,
-    error::{EvalError, TypeError, TypeErrorKind},
+    errors::{EvalError, TypeError, TypeErrorKind},
     value::{lambda::JmlLambda, JmlValue},
 };
 
@@ -41,7 +41,6 @@ pub(crate) fn eval_lambda_application<'source>(
             } else {
                 let mut local_context = Context::default();
                 for (param, arg) in params.into_iter().zip(args.into_iter()) {
-
                     local_context.bind_with_value(param.to_owned(), eval_expr(arg, ctx)?);
                 }
                 ctx.add_local_ctx(local_context);

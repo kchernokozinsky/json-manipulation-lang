@@ -15,7 +15,7 @@ use serde::{
 };
 use string::JmlString;
 
-use crate::{error::TypeErrorKind, jml_type::JmlType};
+use crate::{errors::TypeErrorKind, jml_type::JmlType};
 
 use derive_more::{derive::Display, From};
 

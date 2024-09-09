@@ -4,7 +4,7 @@ use parser::ast::{BinaryOp, Expression};
 
 use crate::{
     context::Context,
-    error::{EvalError, RuntimeError, RuntimeErrorKind, TypeError, TypeErrorKind},
+    errors::{EvalError, RuntimeError, RuntimeErrorKind, TypeError, TypeErrorKind},
     value::JmlValue,
 };
 

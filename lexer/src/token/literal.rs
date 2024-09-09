@@ -1,6 +1,8 @@
 use logos::Lexer;
 
-use super::{errors::LexingError, Token};
+use crate::errors::LexingError;
+
+use super::Token;
 
 pub fn float<'source>(lex: &mut Lexer<'source, Token<'source>>) -> Result<f64, LexingError> {
     lex.slice().parse().map_err(|e| LexingError::InvalidFloat {

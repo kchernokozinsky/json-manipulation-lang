@@ -1,6 +1,6 @@
 use parser::ast::Expression;
 
-use crate::{context::Context, error::EvalError, value::JmlValue};
+use crate::{context::Context, errors::EvalError, value::JmlValue};
 
 use super::eval_expr;
 

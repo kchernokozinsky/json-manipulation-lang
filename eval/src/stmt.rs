@@ -1,6 +1,6 @@
 use parser::ast::{Statement, StatementKind};
 
-use crate::{context::Context, error::EvalError};
+use crate::{context::Context, errors::EvalError};
 
 pub fn eval_stmt<'a>(stmt: Statement<'a>, ctx: &mut Context<'a>) -> Result<(), EvalError> {
     let Statement { l: _, r: _, node } = stmt;

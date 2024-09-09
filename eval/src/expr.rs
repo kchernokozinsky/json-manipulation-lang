@@ -8,7 +8,7 @@ use unary_op::eval_unary_op;
 
 use crate::{
     context::Context,
-    error::{EvalError, RuntimeError, TypeError, TypeErrorKind},
+    errors::{EvalError, RuntimeError, TypeError, TypeErrorKind},
     jml_type::JmlType,
     value::JmlValue,
 };

@@ -5,7 +5,7 @@ use stmt::eval_stmt;
 use value::JmlValue;
 
 pub mod context;
-pub mod error;
+pub mod errors;
 pub mod expr;
 pub mod jml_type;
 pub mod stmt;

@@ -3,7 +3,7 @@ use parser::ast::{Expression, UnaryOp};
 
 use crate::{
     context::Context,
-    error::{EvalError, TypeError, TypeErrorKind},
+    errors::{EvalError, TypeError, TypeErrorKind},
     value::JmlValue,
 };
 

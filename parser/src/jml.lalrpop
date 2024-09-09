@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use lexer::token::{Token, errors::LexingError};
+use lexer::{errors::LexingError, token::Token};
 use crate::ast::{ExpressionKind, Expression, Statement, StatementKind, Identifier, Jml, BinaryOp, UnaryOp};
 
 grammar<'source>(source: &'source str);
