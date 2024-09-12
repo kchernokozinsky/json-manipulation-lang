@@ -36,7 +36,7 @@ increment = \x. x + 1
 {
  fact: factorial(5),
  double_then_increment: double_then_increment(2),
- get: get (2, [1, 2, 3]),
+ get: log(get(2, [1, 2, 3])),
  squares: sum_of_squares(3, 4),
  apply_twice: apply_twice(increment, 5)
-} 
+}

@@ -5,7 +5,7 @@ use parser::ast::{BinaryOp, Expression};
 use crate::{
     context::Context,
     errors::{EvalError, RuntimeError, RuntimeErrorKind, TypeError, TypeErrorKind},
-    value::JmlValue,
+    value::{list::JmlList, object::JmlObject, JmlValue},
 };
 
 use super::eval_expr;
@@ -95,7 +95,13 @@ pub fn eval_binary_op<'source>(
             }
             .into()
         }),
-        BinaryOp::Concat => todo!(),
+        BinaryOp::Concat => concat(lhs, rhs).map_err(|e| {
+            TypeError {
+                span: span.into(),
+                kind: e,
+            }
+            .into()
+        }),
     }
 }
 
@@ -234,3 +240,35 @@ arithmetic_op!(multiply, *, "*");
 arithmetic_op!(mod_op, %, "%");
 arithmetic_op!(divide, /);
 arithmetic_op!(pow, ^);
+
+fn concat<'source>(
+    lhs: JmlValue<'source>,
+    rhs: JmlValue<'source>,
+) -> Result<JmlValue<'source>, TypeErrorKind> {
+    match (&lhs, &rhs) {
+        // Concatenation for strings
+        (JmlValue::String(lhs), JmlValue::String(rhs)) => {
+            Ok(JmlValue::string(lhs.0.clone() + &rhs.0))
+        }
+        // Concatenation for lists
+        (JmlValue::List(JmlList(lhs)), JmlValue::List(JmlList(rhs))) => {
+            let mut combined_list = lhs.clone();
+            combined_list.extend(rhs.clone());
+            Ok(JmlValue::List(JmlList(combined_list)))
+        }
+        // Concatenation for objects (merge key-value pairs)
+        (JmlValue::Object(JmlObject(lhs)), JmlValue::Object(JmlObject(rhs))) => {
+            let mut combined_object = lhs.clone();
+            for (key, value) in rhs {
+                combined_object.insert(key.clone(), value.clone());
+            }
+            Ok(JmlValue::Object(JmlObject(combined_object)))
+        }
+        // If types are not compatible for concatenation, return a type error
+        _ => Err(TypeErrorKind::InvalidBinaryOperator {
+            operator: "concat".to_string(),
+            left: lhs.type_of(),
+            right: rhs.type_of(),
+        }),
+    }
+}

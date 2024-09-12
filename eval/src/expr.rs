@@ -98,11 +98,15 @@ pub fn eval_expr<'source>(
     }
 }
 
-fn eval_variable<'source>(
-    span: impl Into<miette::SourceSpan>,
-    ident: &str,
+fn eval_variable<'source, S, I>(
+    span: S,
+    ident: I,
     ctx: &mut Context<'source>,
-) -> Result<JmlValue<'source>, EvalError> {
+) -> Result<JmlValue<'source>, EvalError>
+where
+    S: Into<miette::SourceSpan>,
+    I: AsRef<str>,
+{
     match ctx.lookup_variable(ident) {
         Ok(bind) => match bind {
             crate::context::Binding::Expression(expr) => eval_expr(expr, ctx),

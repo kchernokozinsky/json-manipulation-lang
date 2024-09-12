@@ -1,0 +1,11 @@
+list = [4,5,6]
+
+incr = \x. x + 1
+
+---
+
+{
+    map: map(list, incr),
+    filter: filter(list, (\ x. x % 2 == 0)),
+    reduce: reduce(list, 1, (\ x acc. log("acc", acc) + x))
+}

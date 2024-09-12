@@ -19,18 +19,6 @@ pub enum Token<'source> {
     #[token("null")]
     Null,
 
-    #[token("filter")]
-    Filter,
-
-    #[token("map")]
-    Map,
-
-    #[token("mapobj")]
-    MapObject,
-
-    #[token("filterobj")]
-    FilterObject,
-
     #[token("fn")]
     Fn,
 
@@ -42,16 +30,6 @@ pub enum Token<'source> {
 
     #[token("else")]
     Else,
-
-    #[token("read")]
-    Read,
-
-    #[token("write")]
-    Write,
-
-    #[token("log")]
-    Log,
-
     // Types
     #[token("String")]
     StringType,
@@ -197,16 +175,9 @@ mod tests {
 
         assert_eq!(lexer.next(), Some(Ok(Token::Let)));
         assert_eq!(lexer.next(), Some(Ok(Token::Null)));
-        assert_eq!(lexer.next(), Some(Ok(Token::Filter)));
-        assert_eq!(lexer.next(), Some(Ok(Token::Map)));
-        assert_eq!(lexer.next(), Some(Ok(Token::MapObject)));
-        assert_eq!(lexer.next(), Some(Ok(Token::FilterObject)));
         assert_eq!(lexer.next(), Some(Ok(Token::Fn)));
         assert_eq!(lexer.next(), Some(Ok(Token::If)));
         assert_eq!(lexer.next(), Some(Ok(Token::Else)));
-        assert_eq!(lexer.next(), Some(Ok(Token::Read)));
-        assert_eq!(lexer.next(), Some(Ok(Token::Write)));
-        assert_eq!(lexer.next(), Some(Ok(Token::Log)));
         assert_eq!(lexer.next(), None); // No more tokens
     }
 

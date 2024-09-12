@@ -32,14 +32,21 @@ impl<'source> Context<'source> {
         Context::default()
     }
 
-    pub fn bind_with_expr(&mut self, name: String, expr: Expression<'source>) {
-        self.bindings.insert(name, RefCell::new(Binding::new(expr)));
+    pub fn bind_with_expr<N>(&mut self, name: N, expr: Expression<'source>)
+    where
+        N: Into<String>,
+    {
+        self.bindings
+            .insert(name.into(), RefCell::new(Binding::new(expr)));
     }
 
-    pub fn bind_with_value(&mut self, name: String, value: impl Into<JmlValue<'source>>) {
+    pub fn bind_with_value<N>(&mut self, name: N, value: impl Into<JmlValue<'source>>)
+    where
+        N: Into<String>,
+    {
         let value = value.into();
         self.bindings
-            .entry(name)
+            .entry(name.into())
             .and_modify(|e| *e.get_mut() = Binding::new_with_value(value.clone()))
             .or_insert(RefCell::new(Binding::new_with_value(value)));
     }
@@ -52,10 +59,13 @@ impl<'source> Context<'source> {
         self.locals.pop();
     }
 
-    pub fn lookup_variable<'context>(
+    pub fn lookup_variable<'context, N>(
         &'context self,
-        name: impl AsRef<str>,
-    ) -> Result<Binding<'source>, RuntimeErrorKind> {
+        name: N,
+    ) -> Result<Binding<'source>, RuntimeErrorKind>
+    where
+        N: AsRef<str>,
+    {
         let local = self.locals.last();
 
         match local {
@@ -67,10 +77,13 @@ impl<'source> Context<'source> {
         }
     }
 
-    fn _lookup_variable<'context>(
+    fn _lookup_variable<'context, N>(
         &'context self,
-        name: impl AsRef<str>,
-    ) -> Result<Binding<'source>, RuntimeErrorKind> {
+        name: N,
+    ) -> Result<Binding<'source>, RuntimeErrorKind>
+    where
+        N: AsRef<str>,
+    {
         self.bindings
             .get(name.as_ref())
             .map(|b| b.borrow().clone())

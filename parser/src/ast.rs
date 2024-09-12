@@ -1,6 +1,4 @@
-use indexmap::IndexMap;
-
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Located<T> {
     pub l: usize,
     pub r: usize,
@@ -26,6 +24,12 @@ pub type Identifier<'source> = Located<&'source str>;
 
 pub type Expression<'source> = Located<ExpressionKind<'source>>;
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Key<'source> {
+    Ident(Identifier<'source>),
+    Expression(Expression<'source>),
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExpressionKind<'source> {
     Null,
@@ -33,7 +37,7 @@ pub enum ExpressionKind<'source> {
     Bool(bool),
     Int(i64),
     String(&'source str),
-    Object(IndexMap<&'source str, Expression<'source>>),
+    Object(Vec<(Key<'source>, Expression<'source>)>),
     List(Vec<Expression<'source>>),
     Variable(&'source str),
     IndexAccess {
@@ -70,6 +74,8 @@ pub enum ExpressionKind<'source> {
         args: Vec<Expression<'source>>,
     },
 }
+
+impl<'source> Eq for Expression<'source> {}
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum BinaryOp {

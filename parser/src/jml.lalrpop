@@ -1,6 +1,6 @@
 use std::str::FromStr;
 use lexer::{errors::LexingError, token::Token};
-use crate::ast::{ExpressionKind, Expression, Statement, StatementKind, Identifier, Jml, BinaryOp, UnaryOp};
+use crate::ast::{ExpressionKind, Expression, Statement, StatementKind, Identifier, Jml, BinaryOp, UnaryOp, Key};
 
 grammar<'source>(source: &'source str);
 
@@ -83,16 +83,19 @@ ExpressionPrecedence2: Expression<'source> = {
     UnaryMinus,
     Index,
     Selector,
-    ExpressionPrecedence1,
+    ExpressionPrecedence105,
+};
 
+ExpressionPrecedence105: Expression<'source> = {
+    Variable,
+    Apply,
+    ExpressionPrecedence1
 };
 
 ExpressionPrecedence1: Expression<'source> = {
-    Apply,
-    Object,
     List,
     Literal,
-    Variable,
+    Object,
     "(" <Expression> ")",
 
 };
@@ -136,7 +139,7 @@ UnaryMinus: Expression<'source> = {
 };
 
 Index: Expression<'source> = {
-   <l:@L> <target: ExpressionPrecedence1> "[" <index: Expression> "]" <r:@L> => Expression {
+   <l:@L> <target: ExpressionPrecedence105> "[" <index: Expression> "]" <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::IndexAccess{
@@ -147,7 +150,7 @@ Index: Expression<'source> = {
 };
 
 Selector: Expression<'source> = {
-   <l:@L> <target: ExpressionPrecedence1> "." <key: Key> <r:@L> => Expression {
+   <l:@L> <target: ExpressionPrecedence105> "." <key: SelectorKey> <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::Selector{
@@ -156,6 +159,11 @@ Selector: Expression<'source> = {
         }
     },
 
+};
+
+SelectorKey: &'source str = {
+    <s: STRING_LITERAL> => s,
+    <s: IDENTIFIER> => s
 };
 
 Concat: Expression<'source> = { 
@@ -353,7 +361,7 @@ Lambda: Expression<'source> = {
 };
 
 Apply: Expression<'source> = {
-    <l:@L> <function: ExpressionPrecedence1> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
+    <l:@L> <function: ExpressionPrecedence105> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::Apply {
@@ -372,13 +380,13 @@ Object: Expression<'source> = {
     }
 };
 
-KeyValue: (&'source str, Expression<'source>) = {
-    <s: Key> ":" <expr: Expression> => (s, expr),
+KeyValue: (Key<'source>, Expression<'source>) = {
+    <k: Key> ":" <expr: Expression> => (k, expr),
 }
 
-Key: &'source str = {
-    <s: STRING_LITERAL> => s,
-    <s: IDENTIFIER> => s
+Key: Key<'source> = {
+    <s: Identifier> => Key::Ident(s),
+    <expr: ExpressionPrecedence1> => Key::Expression(expr),
 };
 
 List: Expression<'source> = {
@@ -417,17 +425,10 @@ extern {
         HEADER        => Token::Header,
         LET           => Token::Let,
         NULL          => Token::Null,
-        FILTER        => Token::Filter,
-        MAP           => Token::Map,
-        MAPOBJ        => Token::MapObject,
-        FILTEROBJ     => Token::FilterObject,
         FN            => Token::Fn,
         IF            => Token::If,
         THEN          => Token::Then,
         ELSE          => Token::Else,
-        READ          => Token::Read,
-        WRITE         => Token::Write,
-        LOG           => Token::Log,
 
         // Types
         STRING_TYPE   => Token::StringType,
