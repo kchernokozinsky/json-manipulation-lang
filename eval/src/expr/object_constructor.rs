@@ -5,7 +5,7 @@ use crate::{
     context::Context,
     errors::{EvalError, TypeError, TypeErrorKind},
     jml_type::JmlType,
-    value::{string::JmlString, JmlValue},
+    value::{float::JmlFloat, integer::JmlInt, string::JmlString, JmlValue},
 };
 
 use super::eval_expr;
@@ -27,6 +27,12 @@ pub(crate) fn eval_object<'source>(
                 match key {
                     JmlValue::String(JmlString(str)) => {
                         result_map.insert(str, evaluated_value);
+                    },
+                    JmlValue::Int(JmlInt(i)) => {
+                        result_map.insert(format!("{}", i), evaluated_value);
+                    },
+                    JmlValue::Float(JmlFloat(f)) => {
+                        result_map.insert(format!("{}", f), evaluated_value);
                     }
                     _ => {
                         let type_error_kind = TypeErrorKind::MismatchedTypes {
