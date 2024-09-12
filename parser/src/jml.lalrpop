@@ -83,16 +83,16 @@ ExpressionPrecedence2: Expression<'source> = {
     UnaryMinus,
     Index,
     Selector,
-    ExpressionPrecedence105,
-};
-
-ExpressionPrecedence105: Expression<'source> = {
-    Variable,
-    Apply,
-    ExpressionPrecedence1
+    ExpressionPrecedence1,
 };
 
 ExpressionPrecedence1: Expression<'source> = {
+    Variable,
+    Apply,
+    ExpressionPrecedence0
+};
+
+ExpressionPrecedence0: Expression<'source> = {
     List,
     Literal,
     Object,
@@ -139,7 +139,7 @@ UnaryMinus: Expression<'source> = {
 };
 
 Index: Expression<'source> = {
-   <l:@L> <target: ExpressionPrecedence105> "[" <index: Expression> "]" <r:@L> => Expression {
+   <l:@L> <target: ExpressionPrecedence1> "[" <index: Expression> "]" <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::IndexAccess{
@@ -150,7 +150,7 @@ Index: Expression<'source> = {
 };
 
 Selector: Expression<'source> = {
-   <l:@L> <target: ExpressionPrecedence105> "." <key: SelectorKey> <r:@L> => Expression {
+   <l:@L> <target: ExpressionPrecedence1> "." <key: SelectorKey> <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::Selector{
@@ -361,7 +361,7 @@ Lambda: Expression<'source> = {
 };
 
 Apply: Expression<'source> = {
-    <l:@L> <function: ExpressionPrecedence105> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
+    <l:@L> <function: ExpressionPrecedence1> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::Apply {
@@ -386,7 +386,7 @@ KeyValue: (Key<'source>, Expression<'source>) = {
 
 Key: Key<'source> = {
     <s: Identifier> => Key::Ident(s),
-    <expr: ExpressionPrecedence1> => Key::Expression(expr),
+    <expr: ExpressionPrecedence0> => Key::Expression(expr),
 };
 
 List: Expression<'source> = {
