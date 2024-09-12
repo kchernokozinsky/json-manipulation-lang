@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use parser::ast::Expression;
 
@@ -7,7 +7,7 @@ use crate::{errors::RuntimeErrorKind, value::JmlValue};
 #[derive(Debug, Default, Clone)]
 pub struct Context<'source> {
     bindings: HashMap<String, RefCell<Binding<'source>>>,
-    locals: Vec<Context<'source>>,
+    parent: Option<Rc<Context<'source>>>,
 }
 
 // planning for lazy evaluation here
@@ -32,6 +32,13 @@ impl<'source> Context<'source> {
         Context::default()
     }
 
+    pub fn new_with_parent(parent: Rc<Context<'source>>) -> Self {
+        Context {
+            bindings: HashMap::new(),
+            parent: Some(parent),
+        }
+    }
+
     pub fn bind_with_expr<N>(&mut self, name: N, expr: Expression<'source>)
     where
         N: Into<String>,
@@ -51,44 +58,20 @@ impl<'source> Context<'source> {
             .or_insert(RefCell::new(Binding::new_with_value(value)));
     }
 
-    pub fn add_local_ctx(&mut self, ctx: Context<'source>) {
-        self.locals.push(ctx)
-    }
-
-    pub fn pop_local_ctx(&mut self) {
-        self.locals.pop();
-    }
-
-    pub fn lookup_variable<'context, N>(
-        &'context self,
-        name: N,
-    ) -> Result<Binding<'source>, RuntimeErrorKind>
+    pub fn lookup_variable<N>(&self, name: N) -> Result<Binding<'source>, RuntimeErrorKind>
     where
         N: AsRef<str>,
     {
-        let local = self.locals.last();
-
-        match local {
-            Some(local) => match local._lookup_variable(name.as_ref()) {
-                Ok(binding) => Ok(binding),
-                Err(_) => self._lookup_variable(name.as_ref()),
-            },
-            None => self._lookup_variable(name),
-        }
-    }
-
-    fn _lookup_variable<'context, N>(
-        &'context self,
-        name: N,
-    ) -> Result<Binding<'source>, RuntimeErrorKind>
-    where
-        N: AsRef<str>,
-    {
-        self.bindings
-            .get(name.as_ref())
-            .map(|b| b.borrow().clone())
-            .ok_or(RuntimeErrorKind::UndefinedVariable {
+        if let Some(binding) = self.bindings.get(name.as_ref()) {
+            Ok(binding.borrow().clone())
+        } else if let Some(parent) = &self.parent {
+            // Recursively search in parent contexts
+            parent.lookup_variable(name)
+        } else {
+            // Variable not found
+            Err(RuntimeErrorKind::UndefinedVariable {
                 name: name.as_ref().to_owned(),
             })
+        }
     }
 }

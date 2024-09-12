@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use parser::ast::{Expression, Identifier};
 
 use crate::{
@@ -50,18 +52,12 @@ where
             } else {
                 let result = match body {
                     lambda::LambdaBody::Common(body) => {
-                        let mut local_context = Context::default();
+                        let mut local_context = Context::new_with_parent(Rc::new(ctx.clone()));
                         for (param, arg) in params.into_iter().zip(args.into_iter()) {
                             local_context.bind_with_value(param.to_owned(), eval_expr(arg, ctx)?);
                         }
 
-                        ctx.add_local_ctx(local_context);
-
-                        let result = eval_expr(body, ctx)?;
-
-                        ctx.pop_local_ctx();
-
-                        result
+                        eval_expr(body, &mut local_context)?
                     }
                     lambda::LambdaBody::Native(fun) => {
                         let mut evaluated_args = vec![];
@@ -104,18 +100,12 @@ where
             } else {
                 let result = match body {
                     lambda::LambdaBody::Common(body) => {
-                        let mut local_context = Context::default();
+                        let mut local_context = Context::new_with_parent(Rc::new(ctx.clone()));
                         for (param, arg) in params.into_iter().zip(args.into_iter()) {
                             local_context.bind_with_value(param.to_owned(), arg);
                         }
 
-                        ctx.add_local_ctx(local_context);
-
-                        let result = eval_expr(body, ctx)?;
-
-                        ctx.pop_local_ctx();
-
-                        result
+                        eval_expr(body, &mut local_context)?
                     }
                     lambda::LambdaBody::Native(fun) => fun(span.into(), args, ctx)?,
                 };

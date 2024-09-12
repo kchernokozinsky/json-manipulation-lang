@@ -27,10 +27,10 @@ pub(crate) fn eval_object<'source>(
                 match key {
                     JmlValue::String(JmlString(str)) => {
                         result_map.insert(str, evaluated_value);
-                    },
+                    }
                     JmlValue::Int(JmlInt(i)) => {
                         result_map.insert(format!("{}", i), evaluated_value);
-                    },
+                    }
                     JmlValue::Float(JmlFloat(f)) => {
                         result_map.insert(format!("{}", f), evaluated_value);
                     }
