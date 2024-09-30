@@ -81,18 +81,22 @@ ExpressionPrecedence3: Expression<'source> = {
 ExpressionPrecedence2: Expression<'source> = {
     Not,
     UnaryMinus,
-    Index,
-    Selector,
     ExpressionPrecedence1,
 };
 
 ExpressionPrecedence1: Expression<'source> = {
-    Variable,
-    Apply,
-    ExpressionPrecedence0
+    Index,
+    Selector,
+    ExpressionPrecedence0,
 };
 
 ExpressionPrecedence0: Expression<'source> = {
+    Variable,
+    Apply,
+    ExpressionPrecedence
+};
+
+ExpressionPrecedence: Expression<'source> = {
     List,
     Literal,
     Object,
@@ -361,7 +365,7 @@ Lambda: Expression<'source> = {
 };
 
 Apply: Expression<'source> = {
-    <l:@L> <function: ExpressionPrecedence1> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
+    <l:@L> <function: ExpressionPrecedence0> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
         l,
         r,
         node: ExpressionKind::Apply {
@@ -386,7 +390,7 @@ KeyValue: (Key<'source>, Expression<'source>) = {
 
 Key: Key<'source> = {
     <s: Identifier> => Key::Ident(s),
-    <expr: ExpressionPrecedence0> => Key::Expression(expr),
+    <expr: ExpressionPrecedence> => Key::Expression(expr),
 };
 
 List: Expression<'source> = {
@@ -423,9 +427,7 @@ extern {
     enum Token<'source> {
         // Keywords
         HEADER        => Token::Header,
-        LET           => Token::Let,
         NULL          => Token::Null,
-        FN            => Token::Fn,
         IF            => Token::If,
         THEN          => Token::Then,
         ELSE          => Token::Else,

@@ -74,13 +74,7 @@ pub fn eval_binary_op<'source>(
         }),
         BinaryOp::Div => divide(lhs, rhs).map_err(|e| map_anyhow(e, span)),
         BinaryOp::Pow => pow(lhs, rhs).map_err(|e| map_anyhow(e, span)),
-        BinaryOp::Mod => mod_op(lhs, rhs).map_err(|e| {
-            TypeError {
-                span: span.into(),
-                kind: e,
-            }
-            .into()
-        }),
+        BinaryOp::Mod => mod_op(lhs, rhs).map_err(|e| map_anyhow(e, span)),
         BinaryOp::And => and(lhs, rhs).map_err(|e| {
             TypeError {
                 span: span.into(),
@@ -197,6 +191,27 @@ macro_rules! arithmetic_op {
 
         }
     };
+
+    ($func_name:ident, %) => {
+        fn $func_name<'a>(lhs: JmlValue, rhs: JmlValue) -> anyhow::Result<JmlValue<'a>> {
+            if rhs.is_zero() {
+                Err(RuntimeErrorKind::DivisionByZero)?
+            }
+            match (&lhs, &rhs) {
+                (JmlValue::Float(lhs), JmlValue::Float(rhs)) => Ok(JmlValue::float(lhs.0 % rhs.0)),
+                (JmlValue::Float(lhs), JmlValue::Int(rhs)) => Ok(JmlValue::float(lhs.0 % rhs.0 as f64)),
+                (JmlValue::Int(lhs), JmlValue::Float(rhs)) => Ok(JmlValue::float(lhs.0 as f64 % rhs.0 )),
+                (JmlValue::Int(lhs), JmlValue::Int(rhs)) =>Ok(JmlValue::int(lhs.0 % rhs.0)),
+                _ => Err(TypeErrorKind::InvalidBinaryOperator {
+                    operator: "%".to_owned(),
+                    left: lhs.type_of(),
+                    right: rhs.type_of(),
+                })?,
+            }
+
+        }
+    };
+
     ($func_name:ident, ^) => {
         fn $func_name<'a>(lhs: JmlValue, rhs: JmlValue) -> anyhow::Result<JmlValue<'a>> {
             match (&lhs, &rhs) {
@@ -237,7 +252,7 @@ macro_rules! arithmetic_op {
 arithmetic_op!(add, +, "+");
 arithmetic_op!(subtract, -, "-");
 arithmetic_op!(multiply, *, "*");
-arithmetic_op!(mod_op, %, "%");
+arithmetic_op!(mod_op, %);
 arithmetic_op!(divide, /);
 arithmetic_op!(pow, ^);
 

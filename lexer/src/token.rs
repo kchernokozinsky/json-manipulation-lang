@@ -13,9 +13,6 @@ pub enum Token<'source> {
     #[token("---")]
     Header,
 
-    #[token("let")]
-    Let,
-
     #[token("null")]
     Null,
 
@@ -170,12 +167,9 @@ mod tests {
 
     #[test]
     fn test_keywords() {
-        let mut lexer =
-            Token::lexer("let null filter map mapobj filterobj fn if else read write log");
+        let mut lexer = Token::lexer("null if else");
 
-        assert_eq!(lexer.next(), Some(Ok(Token::Let)));
         assert_eq!(lexer.next(), Some(Ok(Token::Null)));
-        assert_eq!(lexer.next(), Some(Ok(Token::Fn)));
         assert_eq!(lexer.next(), Some(Ok(Token::If)));
         assert_eq!(lexer.next(), Some(Ok(Token::Else)));
         assert_eq!(lexer.next(), None); // No more tokens
@@ -288,9 +282,8 @@ mod tests {
 
     #[test]
     fn test_comments() {
-        let mut lexer = Token::lexer("// This is a comment\nlet foo = 42; // Another comment");
+        let mut lexer = Token::lexer("// This is a comment\n foo = 42; // Another comment");
 
-        assert_eq!(lexer.next(), Some(Ok(Token::Let)));
         assert_eq!(lexer.next(), Some(Ok(Token::Identifier("foo"))));
         assert_eq!(lexer.next(), Some(Ok(Token::Assign)));
         assert_eq!(lexer.next(), Some(Ok(Token::IntLiteral(42))));

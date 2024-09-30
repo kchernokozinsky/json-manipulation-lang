@@ -1,14 +1,16 @@
 #[cfg(test)]
 mod tests {
-    use lexer::{token::Token, Lexer};
+    use lexer::{errors::LexingError, token::Token, Lexer};
 
     #[test]
-    fn test_keyword_let() {
-        let source = "let";
+    fn test_undefined_token() {
+        let source = "@";
         let mut lexer = Lexer::new(source);
 
-        assert_eq!(lexer.next(), Some(Ok((0, Token::Let, 3))));
-        assert_eq!(lexer.next(), None);
+        match lexer.next() {
+            Some(Err(LexingError::UndefinedToken)) => {}
+            _ => panic!("Expected UndefinedToken error"),
+        }
     }
 
     #[test]
@@ -61,19 +63,17 @@ mod tests {
 
     #[test]
     fn test_combined_expression() {
-        let source = r#"let x = 123 + 456.78;"#;
+        let source = r#"x = 123 + 456.78"#;
         let mut lexer = Lexer::new(source);
 
-        assert_eq!(lexer.next(), Some(Ok((0, Token::Let, 3))));
-        assert_eq!(lexer.next(), Some(Ok((4, Token::Identifier("x"), 5))));
-        assert_eq!(lexer.next(), Some(Ok((6, Token::Assign, 7))));
-        assert_eq!(lexer.next(), Some(Ok((8, Token::IntLiteral(123), 11))));
-        assert_eq!(lexer.next(), Some(Ok((12, Token::Plus, 13))));
+        assert_eq!(lexer.next(), Some(Ok((0, Token::Identifier("x"), 1))));
+        assert_eq!(lexer.next(), Some(Ok((2, Token::Assign, 3))));
+        assert_eq!(lexer.next(), Some(Ok((4, Token::IntLiteral(123), 7))));
+        assert_eq!(lexer.next(), Some(Ok((8, Token::Plus, 9))));
         assert_eq!(
             lexer.next(),
-            Some(Ok((14, Token::FloatLiteral(456.78), 20)))
+            Some(Ok((10, Token::FloatLiteral(456.78), 16)))
         );
-        assert_eq!(lexer.next(), Some(Ok((20, Token::Semicolon, 21))));
         assert_eq!(lexer.next(), None);
     }
 }

@@ -11,7 +11,6 @@ pub fn pluck<'source>(
     args: Vec<JmlValue<'source>>,
     _: &mut Context<'source>,
 ) -> Result<JmlValue<'source>, EvalError> {
-    // First argument should be an object (JmlValue::Object)
     let obj = match &args[0] {
         JmlValue::Object(JmlObject(o)) => o,
         _ => {
@@ -28,12 +27,10 @@ pub fn pluck<'source>(
         }
     };
 
-    // Second argument should be a list of keys (JmlValue::List(JmlString))
     let keys = obj.keys();
 
     let mut plucked_values: Vec<JmlValue> = vec![];
 
-    // Iterate over each key, fetch value from the object, and add it to the list
     for key in keys {
         let value = obj.get(key).unwrap();
         let pair = JmlValue::object(JmlObject(indexmap! {
@@ -43,6 +40,5 @@ pub fn pluck<'source>(
         plucked_values.push(pair);
     }
 
-    // Return the list of plucked values
     Ok(JmlValue::List(JmlList(plucked_values)))
 }
