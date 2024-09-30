@@ -120,4 +120,65 @@ double = \x. x * 2
     "doubled_total": double(sum(10, 20))
 }
 ```
+# CLI Usage Guide
+
+## Overview
+
+The json-manipulation-lang CLI allows you to execute JML (JSON Manipulation Language) scripts on JSON data from the command line. This guide provides instructions and examples on how to use the CLI effectively.
+
+## Basic Usage
+
+The CLI provides a `run` subcommand to execute JML scripts.
+
+```bash
+json-manipulation-lang run [OPTIONS]
+```
+
+### Options for `run` Subcommand
+
+- `-f, --file <FILE>`: (Required) Path to the JML source file to be parsed and evaluated.
+- `-o, --output <FILE>`: Optional path to write the output as JSON. Defaults to standard output.
+- `-v, --variables <name=path>`: Provide variables and their corresponding JSON paths (file path or URL). This option can be used multiple times for multiple variables.
+
+## Example: Running a JML Script on a JSON Variable
+
+Suppose you have a JML script `script.jml` that processes a JSON variable `data`.
+
+**Contents of script.jml:**
+
+```jml
+filter(data, \ elem. elem.value > 10)
+```
+
+**JSON Data File `data.json`:**
+
+```json
+[
+  {"id": 1, "value": 5},
+  {"id": 2, "value": 15},
+  {"id": 3, "value": 25}
+]
+```
+
+**Command:**
+
+```bash
+jml-cli run -f script.jml -v data=data.json -o output.json
+```
+
+**Explanation:**
+
+- `run`: Subcommand to execute the script.
+- `-f script.jml`: Specifies the JML script file to run.
+- `-v data=data.json`: Sets the variable `data` to the contents of `data.json`.
+- `-o output.json`: Writes the output to `output.json`.
+
+**Output (`output.json`):**
+
+```json
+[
+  {"id": 2, "value": 15},
+  {"id": 3, "value": 25}
+]
+```
 
