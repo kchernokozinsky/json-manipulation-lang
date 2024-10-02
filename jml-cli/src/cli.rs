@@ -22,7 +22,6 @@ pub struct JmlCli {
 }
 
 #[derive(Subcommand)]
-
 pub enum JmlCommand {
     /// Run the JML parser and evaluator on a given file.
     Run {
