@@ -1,0 +1,3 @@
+[workspace]
+
+members = ["eval", "jml-cli", "lexer", "parser"]

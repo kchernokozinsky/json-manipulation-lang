@@ -1,0 +1,5 @@
+{
+    payload: payload
+}
+
+// cargo run -- run -v payload=https://jsonplaceholder.typicode.com/todos/1  -f ../examples/example.jml

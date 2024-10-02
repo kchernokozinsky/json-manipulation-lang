@@ -1,0 +1,13 @@
+[package]
+name = "parser"
+version = "0.1.0"
+edition = "2021"
+
+
+[build-dependencies]
+lalrpop = "0.21.0"
+
+[dependencies]
+lexer = { path = "../lexer" }
+lalrpop-util = { version = "0.21.0", features = ["lexer", "unicode"] }
+indexmap = { version = "2.5.0", features = ["serde"] }

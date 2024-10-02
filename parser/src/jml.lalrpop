@@ -1,0 +1,485 @@
+use std::str::FromStr;
+use lexer::{errors::LexingError, token::Token};
+use crate::ast::{ExpressionKind, Expression, Statement, StatementKind, Identifier, Jml, BinaryOp, UnaryOp, Key};
+
+grammar<'source>(source: &'source str);
+
+pub Jml: Jml<'source> = {
+    <header: Header?> <body:Expression> => Jml{
+        header: header.unwrap_or(vec![]), 
+        body
+    }  
+};
+
+pub Header: Vec<Statement<'source>> = {
+    <header: Statement+> HEADER => header
+}
+
+pub Statement: Statement<'source> = {
+    <l:@L> <identifier:Identifier> "=" <expression:Expression> <r:@L> => Statement
+        {
+            l,
+            r,
+            node: StatementKind::Bind{identifier, expression},
+        },
+};
+
+pub Expression: Expression<'source> = {
+    Lambda,
+    ExpressionPrecedence10,
+    };
+
+ExpressionPrecedence10: Expression<'source> = {
+    IfExpr,
+    ExpressionPrecedence9,
+};
+
+ExpressionPrecedence9: Expression<'source> = {
+    Or,
+    ExpressionPrecedence8,
+};
+
+ExpressionPrecedence8: Expression<'source> = {
+    And,
+    ExpressionPrecedence7,
+};
+
+ExpressionPrecedence7: Expression<'source> = {
+    Equal,
+    NotEqual,
+    LessThan,
+    LessEqual,
+    GreaterThan,
+    GreaterEqual,
+    ExpressionPrecedence6,
+};
+
+ExpressionPrecedence6: Expression<'source> = {
+    Sum,
+    Sub,
+    ExpressionPrecedence5,
+};
+
+ExpressionPrecedence5: Expression<'source> = {
+    Concat,
+    ExpressionPrecedence4,
+};
+
+ExpressionPrecedence4: Expression<'source> = {
+    Mul,
+    Div,
+    Mod,
+    ExpressionPrecedence3,
+};
+
+ExpressionPrecedence3: Expression<'source> = {
+    Pow,
+    ExpressionPrecedence2,
+
+};
+
+ExpressionPrecedence2: Expression<'source> = {
+    Not,
+    UnaryMinus,
+    ExpressionPrecedence1,
+};
+
+ExpressionPrecedence1: Expression<'source> = {
+    Index,
+    Selector,
+    ExpressionPrecedence0,
+};
+
+ExpressionPrecedence0: Expression<'source> = {
+    Variable,
+    Apply,
+    ExpressionPrecedence
+};
+
+ExpressionPrecedence: Expression<'source> = {
+    List,
+    Literal,
+    Object,
+    "(" <Expression> ")",
+
+};
+
+IfExpr: Expression<'source> = {
+    <l:@L> IF <condition: ExpressionPrecedence10> THEN <then_branch: ExpressionPrecedence10> ELSE <else_branch: ExpressionPrecedence10> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::IfExpr {
+            condition: Box::new(condition),
+            then_branch: Box::new(then_branch),
+            else_branch: Box::new(else_branch),
+        }
+    }
+};
+
+Literal: Expression<'source> = {
+    Bool,
+    String,
+    Null,
+    Float,
+    Int,
+};
+
+Not: Expression<'source> = {
+<l:@L> "!" <expression:ExpressionPrecedence2> <r:@L> => Expression 
+    {
+        l,
+        r,
+        node: ExpressionKind::UnaryOp{op: UnaryOp::Not, expr: Box::new(expression)},
+    },   
+};
+
+UnaryMinus: Expression<'source> = {
+<l:@L> "-" <expression:ExpressionPrecedence2> <r:@L> => Expression 
+    {
+        l,
+        r,
+        node: ExpressionKind::UnaryOp{op: UnaryOp::Minus, expr: Box::new(expression)},
+    },   
+};
+
+Index: Expression<'source> = {
+   <l:@L> <target: ExpressionPrecedence1> "[" <index: Expression> "]" <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::IndexAccess{
+            target: target.into(),
+            index: index.into()
+        }
+    }
+};
+
+Selector: Expression<'source> = {
+   <l:@L> <target: ExpressionPrecedence1> "." <key: SelectorKey> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Selector{
+            target: target.into(),
+            key
+        }
+    },
+
+};
+
+SelectorKey: &'source str = {
+    <s: STRING_LITERAL> => s,
+    <s: IDENTIFIER> => s
+};
+
+Concat: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence5> "++" <rhs:ExpressionPrecedence4> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Concat, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Sum: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence6> "+" <rhs:ExpressionPrecedence5> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Sum, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Or: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence9> "||" <rhs:ExpressionPrecedence8> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Or, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+And: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence8> "&&" <rhs:ExpressionPrecedence7> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::And, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+GreaterThan: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence7> ">" <rhs:ExpressionPrecedence6> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::GT, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+GreaterEqual: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence7> ">=" <rhs:ExpressionPrecedence6> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::GE, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+LessThan: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence7> "<" <rhs:ExpressionPrecedence6> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::LT, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+LessEqual: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence7> "<=" <rhs:ExpressionPrecedence6> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::LE, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Equal: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence7> "==" <rhs:ExpressionPrecedence6> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::EQ, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+NotEqual: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence7> "!=" <rhs:ExpressionPrecedence6> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::NE, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Sub: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence6> "-" <rhs:ExpressionPrecedence5> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Sub, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Mul: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence4> "*" <rhs:ExpressionPrecedence3> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Mul, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Mod: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence4> "%" <rhs:ExpressionPrecedence3> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Mod, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Div: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence4> "/" <rhs:ExpressionPrecedence3> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Div, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Pow: Expression<'source> = { 
+    <l:@L> <lhs:ExpressionPrecedence2> "^" <rhs:ExpressionPrecedence3> <r:@L> => Expression
+        {
+            l,
+            r,
+            node: ExpressionKind::BinaryOp{op: BinaryOp::Pow, lhs: Box::new(lhs), rhs: Box::new(rhs)},
+        },
+}
+
+Identifier: Identifier<'source> = {
+   <l:@L> <s: IDENTIFIER> <r:@L> => Identifier {
+        l,
+        r,
+        node: s
+    }
+};
+
+Variable: Expression<'source> = {
+   <l:@L> <s: IDENTIFIER> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Variable(s)
+    }
+};
+
+String: Expression<'source> = {
+   <l:@L> <s: STRING_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::String(s)
+    }
+};
+
+Null: Expression<'source> = {
+   <l:@L> NULL <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Null
+    }
+};
+
+Bool: Expression<'source> = {
+    <l:@L> <b: BOOL_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Bool(b)
+    }
+};
+
+Float: Expression<'source> = {
+    <l:@L> <f: FLOAT_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Float(f)
+    }
+};
+
+Lambda: Expression<'source> = {
+    <l:@L> "\\" <parameters: Identifier*> "." <body: ExpressionPrecedence10> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Lambda{
+            params: parameters,
+            body: Box::new(body)
+        },
+    }
+};
+
+Apply: Expression<'source> = {
+    <l:@L> <function: ExpressionPrecedence0> "(" <args: Comma<Expression>> ")" <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Apply {
+            lambda: Box::new(function),
+            args,
+        }
+    }
+};
+
+Object: Expression<'source> = {
+    <l:@L> "{" <pairs:Comma<(KeyValue)>> "}" <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Object(pairs.into_iter()
+                                            .collect()),
+    }
+};
+
+KeyValue: (Key<'source>, Expression<'source>) = {
+    <k: Key> ":" <expr: Expression> => (k, expr),
+}
+
+Key: Key<'source> = {
+    <s: Identifier> => Key::Ident(s),
+    <expr: ExpressionPrecedence> => Key::Expression(expr),
+};
+
+List: Expression<'source> = {
+    <l:@L> "[" <elems:Comma<Expression>> "]" <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::List(elems),
+    }
+};
+
+Int: Expression<'source> = {
+    <l:@L> <i: INT_LITERAL> <r:@L> => Expression {
+        l,
+        r,
+        node: ExpressionKind::Int(i)
+    }
+};
+
+#[inline]
+Comma<T>: Vec<T> = { 
+    <mut v:(<T> ",")*> <e:T?> => match e { 
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
+
+extern {
+    type Location = usize;
+    type Error = LexingError;
+
+    enum Token<'source> {
+        // Keywords
+        HEADER        => Token::Header,
+        NULL          => Token::Null,
+        IF            => Token::If,
+        THEN          => Token::Then,
+        ELSE          => Token::Else,
+
+        // Types
+        STRING_TYPE   => Token::StringType,
+        FLOAT_TYPE    => Token::FloatType,
+        BOOL_TYPE     => Token::BoolType,
+        INT_TYPE      => Token::IntType,
+        ARRAY_TYPE    => Token::ArrayType,
+        OBJECT_TYPE   => Token::ObjectType,
+        NULLTYPE_TYPE => Token::NullType,
+
+        // Literals and Identifiers
+        STRING_LITERAL => Token::StringLiteral(<&'source str>),
+        IDENTIFIER     => Token::Identifier(<&'source str>),
+        INT_LITERAL    => Token::IntLiteral(<i64>),
+        FLOAT_LITERAL => Token::FloatLiteral(<f64>),
+        BOOL_LITERAL    => Token::BoolLiteral(<bool>),
+
+        // Operators
+        "%"             => Token::Mod,
+        "^"             => Token::Pow,
+        "++"            => Token::Concat,
+        "+"             => Token::Plus,
+        "-"             => Token::Minus,
+        "*"             => Token::Star,
+        "/"             => Token::Slash,
+        "\\"            => Token::BackSlash,
+        "=="            => Token::Equal,
+        "!="            => Token::NotEqual,
+        "<"             => Token::LessThan,
+        ">"             => Token::GreaterThan,
+        "<="            => Token::LessEqual,
+        ">="            => Token::GreaterEqual,
+        "&&"            => Token::And,
+        "||"            => Token::Or,
+        "!"             => Token::Not,
+        "="             => Token::Assign,
+
+        // Symbols
+        "."             => Token::Dot,
+        ","             => Token::Comma,
+        ":"             => Token::Colon,
+        ";"             => Token::Semicolon,
+        "("             => Token::LParen,
+        ")"             => Token::RParen,
+        "["             => Token::LBracket,
+        "]"             => Token::RBracket,
+        "{"             => Token::LBrace,
+        "}"             => Token::RBrace,
+        "=>"         => Token::Arrow,
+
+    }
+}

@@ -1,0 +1,10 @@
+
+some_object = {
+    a: true,
+    b: false
+}
+
+---
+
+if some_object.b then "then branch" 
+                 else "else branch"
