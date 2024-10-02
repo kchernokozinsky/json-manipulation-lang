@@ -94,6 +94,20 @@ impl<'source> TryFrom<JmlValue<'source>> for i64 {
     }
 }
 
+impl<'source> TryFrom<JmlValue<'source>> for String {
+    type Error = TypeErrorKind;
+
+    fn try_from(value: JmlValue) -> Result<Self, Self::Error> {
+        match value {
+            JmlValue::String(v) => Ok(v.0),
+            _ => Err(TypeErrorKind::MismatchedTypes {
+                expected: vec![JmlType::Int],
+                found: value.type_of(),
+            }),
+        }
+    }
+}
+
 impl<'source> JmlValue<'source> {
     pub fn null() -> JmlValue<'source> {
         JmlValue::Null

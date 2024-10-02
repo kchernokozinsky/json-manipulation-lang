@@ -8,8 +8,10 @@ use super::JmlValue;
 pub struct JmlObject<'source>(pub(crate) IndexMap<String, JmlValue<'source>>);
 
 impl<'source> JmlObject<'source> {
-    pub fn access_by_key(&self, key: &str) -> JmlValue<'source> {
-        self.0.get(key).map_or(JmlValue::null(), |v| v.clone())
+    pub fn access_by_key(&self, key: impl AsRef<str>) -> JmlValue<'source> {
+        self.0
+            .get(key.as_ref())
+            .map_or(JmlValue::null(), |v| v.clone())
     }
 }
 

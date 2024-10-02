@@ -113,17 +113,31 @@ fn eval_index_access<'source>(
     let index_l = index.l;
     let index_r = index.r;
 
-    let index: i64 = eval_expr(index, ctx)?.try_into().map_err(|e| TypeError {
-        span: (index_l, index_r - index_l).into(),
-        kind: e,
-    })?;
-
     let target_l = target.l;
     let target_r = target.r;
     let target_val = eval_expr(target, ctx)?;
     match &target_val {
-        JmlValue::List(v) => Ok(v.access_by_index(index as usize)),
-        JmlValue::String(_) => todo!(),
+        JmlValue::List(v) => {
+            let index: i64 = eval_expr(index, ctx)?.try_into().map_err(|e| TypeError {
+                span: (index_l, index_r - index_l).into(),
+                kind: e,
+            })?;
+            Ok(v.access_by_index(index as usize))
+        }
+        JmlValue::String(v) => {
+            let index: i64 = eval_expr(index, ctx)?.try_into().map_err(|e| TypeError {
+                span: (index_l, index_r - index_l).into(),
+                kind: e,
+            })?;
+            Ok(v.get_by_index(index as usize))
+        }
+        JmlValue::Object(v) => {
+            let key: String = eval_expr(index, ctx)?.try_into().map_err(|e| TypeError {
+                span: (index_l, index_r - index_l).into(),
+                kind: e,
+            })?;
+            Ok(v.access_by_key(key))
+        }
         _ => {
             let type_error = TypeError {
                 span: (target_l, target_r - target_l).into(),

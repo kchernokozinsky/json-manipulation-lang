@@ -29,7 +29,7 @@ pub(crate) fn eval_object<'source>(
                         result_map.insert(str, evaluated_value);
                     }
                     JmlValue::Int(JmlInt(i)) => {
-                        result_map.insert( i.to_string(), evaluated_value);
+                        result_map.insert(i.to_string(), evaluated_value);
                     }
                     JmlValue::Float(JmlFloat(f)) => {
                         result_map.insert(f.to_string(), evaluated_value);
