@@ -19,6 +19,10 @@ use clap::{Parser, Subcommand};
 pub struct JmlCli {
     #[command(subcommand)]
     pub command: JmlCommand,
+
+    /// Enable or disable logging
+    #[arg(short, long, help = "Turn logging on or off")]
+    pub log: bool,
 }
 
 #[derive(Subcommand)]
