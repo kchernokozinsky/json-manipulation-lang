@@ -99,27 +99,27 @@ mod tests {
 
     #[test]
     fn test_parse_object() {
-        // let source = r#"{"key1": 42, "key2": "value"}"#;
+        let source = r#"{"key1": 42, "key2": "value"}"#;
 
-        // let lexer = Lexer::new(source);
-        // let expression = jml::ExpressionParser::new().parse(source, lexer).unwrap();
+        let lexer = Lexer::new(source);
+        let expression = jml::ExpressionParser::new().parse(source, lexer).unwrap();
 
-        // if let ExpressionKind::Object(map) = expression.node {
-        //     assert_eq!(map.len(), 2);
-        //     if let ExpressionKind::Int(value) = map["key1"].node {
-        //         assert_eq!(value, 42);
-        //     } else {
-        //         panic!("Expected an Int expression for key1");
-        //     }
+        if let ExpressionKind::Object(map) = expression.node {
+            assert_eq!(map.len(), 2);
+            if let ExpressionKind::Int(value) = map[0].1.node {
+                assert_eq!(value, 42);
+            } else {
+                panic!("Expected an Int expression for key1");
+            }
 
-        //     if let ExpressionKind::String(value) = map["key2"].node {
-        //         assert_eq!(value, "value");
-        //     } else {
-        //         panic!("Expected a String expression for key2");
-        //     }
-        // } else {
-        //     panic!("Expected an Object expression");
-        // }
+            if let ExpressionKind::String(value) = map[1].1.node {
+                assert_eq!(value, "value");
+            } else {
+                panic!("Expected a String expression for key2");
+            }
+        } else {
+            panic!("Expected an Object expression");
+        }
     }
 
     #[test]
