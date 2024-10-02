@@ -13,7 +13,8 @@ d = "some_string"
 ```
 
 ### JSON Object Construction
-Embed variable bindings directly into JSON objects. The code is divided into two sections: the header, which contains all variable bindings (statements), and the body, separated by the '---' keyword, containing a single expression: 
+
+Variables can be bound to any expression, and their evaluation is done lazily — meaning that the variable is only computed when it is actually used. The code is divided into two sections: the header, which contains all variable bindings (statements), and the body, separated by the `---` keyword, which includes a single expression. Variables are evaluated as they are accessed in the body, optimizing performance by avoiding unnecessary calculations.
 
 **Header:**
 ```jml
