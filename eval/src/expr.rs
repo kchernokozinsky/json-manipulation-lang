@@ -36,50 +36,9 @@ pub fn eval_expr<'source>(
         parser::ast::ExpressionKind::List(elems) => eval_list(elems, ctx),
         parser::ast::ExpressionKind::Variable(ident) => eval_variable(span, ident, ctx),
         parser::ast::ExpressionKind::IndexAccess { target, index } => {
-            let index_l = index.l;
-            let index_r = index.r;
-
-            let index: i64 = eval_expr(*index, ctx)?.try_into().map_err(|e| TypeError {
-                span: (index_l, index_r - index_l).into(),
-                kind: e,
-            })?;
-
-            let target_l = target.l;
-            let target_r = target.r;
-            let target_val = eval_expr(*target, ctx)?;
-            match &target_val {
-                JmlValue::List(v) => Ok(v.access_by_index(index as usize)),
-                JmlValue::String(_) => todo!(),
-                _ => {
-                    let type_error = TypeError {
-                        span: (target_l, target_r - target_l).into(),
-                        kind: TypeErrorKind::MismatchedTypes {
-                            expected: vec![JmlType::List, JmlType::String],
-                            found: target_val.type_of(),
-                        },
-                    };
-                    Err(type_error)?
-                }
-            }
+            eval_index_access(*target, *index, ctx)
         }
-        parser::ast::ExpressionKind::Selector { target, key } => {
-            let target_l = target.l;
-            let target_r = target.r;
-            let val = eval_expr(*target, ctx)?;
-            match val {
-                JmlValue::Object(ob) => Ok(ob.access_by_key(key)),
-                _ => {
-                    let type_error = TypeError {
-                        span: (target_l, target_r - target_l).into(),
-                        kind: TypeErrorKind::MismatchedTypes {
-                            expected: vec![JmlType::List, JmlType::String],
-                            found: val.type_of(),
-                        },
-                    };
-                    Err(type_error)?
-                }
-            }
-        }
+        parser::ast::ExpressionKind::Selector { target, key } => eval_selector(*target, key, ctx),
         parser::ast::ExpressionKind::UnaryOp { op, expr } => eval_unary_op(span, op, *expr, ctx),
         parser::ast::ExpressionKind::BinaryOp { op, lhs, rhs } => {
             eval_binary_op(span, op, *lhs, *rhs, ctx)
@@ -117,5 +76,63 @@ where
             kind: e,
         }
         .into()),
+    }
+}
+
+fn eval_selector<'source, I>(
+    target: Expression<'source>,
+    key: I,
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError>
+where
+    I: AsRef<str>,
+{
+    let target_l = target.l;
+    let target_r = target.r;
+    let val = eval_expr(target, ctx)?;
+    match val {
+        JmlValue::Object(ob) => Ok(ob.access_by_key(key.as_ref())),
+        _ => {
+            let type_error = TypeError {
+                span: (target_l, target_r - target_l).into(),
+                kind: TypeErrorKind::MismatchedTypes {
+                    expected: vec![JmlType::List, JmlType::String],
+                    found: val.type_of(),
+                },
+            };
+            Err(type_error)?
+        }
+    }
+}
+
+fn eval_index_access<'source>(
+    target: Expression<'source>,
+    index: Expression<'source>,
+    ctx: &mut Context<'source>,
+) -> Result<JmlValue<'source>, EvalError> {
+    let index_l = index.l;
+    let index_r = index.r;
+
+    let index: i64 = eval_expr(index, ctx)?.try_into().map_err(|e| TypeError {
+        span: (index_l, index_r - index_l).into(),
+        kind: e,
+    })?;
+
+    let target_l = target.l;
+    let target_r = target.r;
+    let target_val = eval_expr(target, ctx)?;
+    match &target_val {
+        JmlValue::List(v) => Ok(v.access_by_index(index as usize)),
+        JmlValue::String(_) => todo!(),
+        _ => {
+            let type_error = TypeError {
+                span: (target_l, target_r - target_l).into(),
+                kind: TypeErrorKind::MismatchedTypes {
+                    expected: vec![JmlType::List, JmlType::String],
+                    found: target_val.type_of(),
+                },
+            };
+            Err(type_error)?
+        }
     }
 }
