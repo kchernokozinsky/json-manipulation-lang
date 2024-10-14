@@ -1,0 +1,4 @@
+{
+    unary_minus: - ( 3 + 5),
+    not: ! ( true || false)
+}

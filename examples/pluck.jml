@@ -1,0 +1,12 @@
+
+obj = {
+    i: 1,
+    b: 2, 
+    c: 3
+}
+
+plucked = pluck(obj)
+
+---
+
+reduce( plucked, {}, (\ x acc. acc ++ {(x.key ++ "_suffix"): x.value} ) )

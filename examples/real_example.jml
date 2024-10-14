@@ -1,0 +1,81 @@
+ students = [
+        {
+            "studentId": 101,
+            "personId": 1,
+            "courses": ["Math", "Physics", "Computer Science"],
+            "gpa": 3.8
+        },
+        {
+            "studentId": 102,
+            "personId": 2,
+            "courses": ["Biology", "Chemistry", "Math"],
+            "gpa": 3.6
+        },
+        {
+            "studentId": 103,
+            "personId": 3,
+            "courses": ["History", "Literature", "Sociology"],
+            "gpa": 3.7
+        },
+        {
+            "studentId": 104,
+            "personId": 4,
+            "courses": ["Philosophy", "Art", "Psychology"],
+            "gpa": 3.9
+        },
+        {
+            "studentId": 105,
+            "personId": 5,
+            "courses": ["Engineering", "Math", "Computer Science"],
+            "gpa": 3.5
+        }
+    ]
+
+persons = [
+        {
+            "personId": 1,
+            "firstName": "John",
+            "lastName": "Doe",
+            "age": 30,
+            "gender": "Male",
+            "email": "john.doe@example.com"
+        },
+        {
+            "personId": 2,
+            "firstName": "Jane",
+            "lastName": "Smith",
+            "age": 28,
+            "gender": "Female",
+            "email": "jane.smith@example.com"
+        },
+        {
+            "personId": 3,
+            "firstName": "Mark",
+            "lastName": "Johnson",
+            "age": 35,
+            "gender": "Male",
+            "email": "mark.johnson@example.com"
+        },
+        {
+            "personId": 4,
+            "firstName": "Emma",
+            "lastName": "Brown",
+            "age": 25,
+            "gender": "Female",
+            "email": "emma.brown@example.com"
+        },
+        {
+            "personId": 5,
+            "firstName": "Luke",
+            "lastName": "Wilson",
+            "age": 33,
+            "gender": "Male",
+            "email": "luke.wilson@example.com"
+        }
+    ]
+
+get_student_by_id = \id stdts. filter(stdts, (\ s. s.personId == id))[0]  
+
+--- 
+
+map(persons, (\p . p ++ get_student_by_id(p.personId, students)))
